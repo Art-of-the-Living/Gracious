@@ -1,6 +1,6 @@
 package console
 
-import "gracious/model"
+import "github.com/KennethGrace/gracious/model"
 
 func ASCIIToQuale(character rune) model.Quale {
 	quale := model.NewQuale(256)
