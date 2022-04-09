@@ -1,23 +1,23 @@
 package base
 
-// Neuron models the unary behaviour of a single neuron. A neuron may be of two types, Basic and Broadcast.
+import (
+	"github.com/KennethGrace/gracious/model"
+)
+
+// Neuron models the unary behaviour of a single neuron. A neuron is only tangibly useful as a component part of a
+// system of Neurons. The goal of each individual neuron is to form an association between synaptic inputs and the
+// Neurons "firing" state. The neuron should fire, if and only if, the synaptic inputs
 type Neuron struct {
-	Synapses                   []*Synapse
-	MainSignal                 *int
-	CorrelationThresholdSignal *int
-	LearningControlSignal      *int
-	SumOfWeights               int // A value indicating the number of weights over the weight minimum.
-	SumOfSynapticFirings       int
-	index                      int // A value denoting the neurons position within a NeuronGroup
+	// Internal Attributes
+	synapses []Synapse
 }
 
-func NewNeuron(index int, synapseCount int) *Neuron {
-	synapses := make([]*Synapse, synapseCount)
+func NewNeuron(synapseCount int) Neuron {
+	synapses := make([]Synapse, synapseCount)
 	for i := 0; i < len(synapses); i++ {
 		synapses[i] = NewSynapse()
 	}
-	n := Neuron{Synapses: synapses, index: index}
-	return &n
+	return Neuron{synapses: synapses}
 }
 
 type NeuronProducts struct {
@@ -25,18 +25,28 @@ type NeuronProducts struct {
 	value int
 }
 
-// Evoke retrieves the strength of the Neuron signal strength, but only after computing a new strength value
-// based on the current state of the Neuron's component synapses. If you want to retrieve the Neuron's signal strength
-// without evocation of the synapses or testing for learning use "Evoke" directly.
-func (n *Neuron) Evoke() {
+// GetSumOfWeights returns the amount of synapses which have learnt their weight values. In a bipolar system, this is
+// equal to the difference between the number of synapses and the true sum of weights.
+func (n *Neuron) GetSumOfWeights() int {
+	weightSum := 0
+	count := len(n.synapses)
+	for i := 0; i < count; i++ {
+		weightSum += n.synapses[i].weightValue
+	}
+	return count + weightSum // Fancy.
+}
+
+// Evoke retrieves the strength of the Neuronal signal. The strength is equivalent to the sum of the synaptic
+// evocations for a given associative Quale. A synaptic evocation, retrieved with Synapse.Evoke(), triggers synaptic
+// learning and returns the product of the bipolar synaptic weight and the feature of the associative Quale.
+func (n *Neuron) Evoke(training int, associative model.Quale, correlation int, learningControl int) int {
 	sum := 0
 	weightSum := 0
-	count := len(n.Synapses)
+	count := len(n.synapses)
 	for i := 0; i < count; i++ {
-		weightSum += n.Synapses[i].weightValue
-		sum += n.Synapses[i].Evoke(*n.MainSignal, *n.CorrelationThresholdSignal)
+		weightSum += n.synapses[i].weightValue
+		feature, _ := associative.GetFeature(i)
+		sum += n.synapses[i].Evoke(training, feature, correlation, learningControl)
 	}
-	//println("Neuron", &n, "Evoked: ", sum)
-	n.SumOfWeights = count + weightSum
-	n.SumOfSynapticFirings = sum
+	return sum
 }

@@ -1,83 +1,66 @@
 package base
 
+import "github.com/KennethGrace/gracious/model"
+
 type NeuronGroup struct {
-	Neurons                    []*Neuron
-	MainSignalLines            []*int
-	AssociativeSignalLines     []*int
+	// Internal Attributes
+	neurons []Neuron
+	// Inbound Attributes
+	main                       *model.Quale //At initialization a new Quale is made.
+	association                *model.Quale //At initialization a new Quale is made.
 	CorrelationThresholdSignal *int
 	LearningControlSignal      *int
-	Match                      int
-	Novelty                    int
-	OutSignal                  []int
+	// Outbound Attributes
+	Match   int
+	Novelty int
+	MainOut model.Quale
 }
 
 func NewNeuronGroup(neuronCount int, synapseCount int) *NeuronGroup {
-	neurons := make([]*Neuron, neuronCount)
-	mainSignalLines := make([]*int, neuronCount)
-	associativeSignalLines := make([]*int, synapseCount)
+	neurons := make([]Neuron, neuronCount)
+	main := model.NewQuale(neuronCount)
+	associative := model.NewQuale(synapseCount)
 	correlationThresholdSignal := new(int)
 	learningControlSignal := new(int)
-	for j := 0; j < len(associativeSignalLines); j++ {
-		associativeSignalLines[j] = new(int)
-	}
 	for i := 0; i < len(neurons); i++ {
-		neurons[i] = NewNeuron(i, synapseCount)
-		neurons[i].MainSignal = new(int)
-		mainSignalLines[i] = neurons[i].MainSignal
-		neurons[i].LearningControlSignal = learningControlSignal
-		neurons[i].CorrelationThresholdSignal = correlationThresholdSignal
-		for j := 0; j < len(neurons[i].Synapses); j++ {
-			neurons[i].Synapses[j].AssociativeSignal = associativeSignalLines[j]
-			neurons[i].Synapses[j].LearningControlSignal = learningControlSignal
+		neurons[i] = NewNeuron(synapseCount)
+		for j := 0; j < len(neurons[i].synapses); j++ {
 		}
 	}
-	ng := NeuronGroup{Neurons: neurons}
-	ng.MainSignalLines = mainSignalLines
-	ng.AssociativeSignalLines = associativeSignalLines
+	ng := NeuronGroup{neurons: neurons}
+	ng.main = &main
+	ng.association = &associative
 	ng.CorrelationThresholdSignal = correlationThresholdSignal
 	ng.LearningControlSignal = learningControlSignal
-	ng.OutSignal = make([]int, neuronCount)
+	ng.MainOut = model.NewQuale(neuronCount)
 	return &ng
 }
 
-func (ng *NeuronGroup) SetNewMainSignalLines(signals []*int) {
-	if len(ng.Neurons) != len(signals) {
-		panic("Length of new signals not equal to neuron count")
-	}
-	for i := 0; i < len(ng.Neurons); i++ {
-		ng.Neurons[i].MainSignal = signals[i]
-	}
-	ng.MainSignalLines = signals
+func (ng *NeuronGroup) SetMain(q *model.Quale) {
+	ng.main = q
 }
 
-func (ng *NeuronGroup) SetNewAssociativeSignalLines(signals []*int) {
-	for i := 0; i < len(ng.Neurons); i++ {
-		if len(ng.Neurons[i].Synapses) != len(signals) {
-			panic("Length of new signals not equal to synapse count")
-		}
-		for j := 0; i < len(ng.Neurons[i].Synapses); j++ {
-			ng.Neurons[i].Synapses[j].AssociativeSignal = signals[j]
-		}
-	}
-	ng.AssociativeSignalLines = signals
+func (ng *NeuronGroup) SetAssociation(q *model.Quale) {
+	ng.association = q
 }
 
 // Evoke updates the Neuron Group for the moment of time, T.
 func (ng *NeuronGroup) Evoke() {
 	sigMax := 0
-	sumLines := make([]int, len(ng.Neurons))
-	for i := 0; i < len(ng.Neurons); i++ {
-		ng.Neurons[i].Evoke()
-		if ng.Neurons[i].SumOfSynapticFirings > sigMax {
-			sigMax = ng.Neurons[i].SumOfSynapticFirings
+	sumLines := make([]int, len(ng.neurons))
+	for i := 0; i < len(ng.neurons); i++ {
+		training, _ := ng.main.GetFeature(i)
+		sum := ng.neurons[i].Evoke(training, *ng.association, *ng.CorrelationThresholdSignal, *ng.LearningControlSignal)
+		if sum > sigMax {
+			sigMax = sum
 		}
-		sumLines[i] = ng.Neurons[i].SumOfSynapticFirings
+		sumLines[i] = sum
 	}
 	for i := 0; i < len(sumLines); i++ {
 		if sumLines[i] < sigMax {
-			ng.OutSignal[i] = 0
+			_ = ng.MainOut.SetFeature(i, 0)
 		} else {
-			ng.OutSignal[i] = 1
+			_ = ng.MainOut.SetFeature(i, 1)
 		}
 	}
 }

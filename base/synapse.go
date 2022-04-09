@@ -1,34 +1,29 @@
 package base
 
 type Synapse struct {
-	Value                 int
-	AssociativeSignal     *int
-	LearningControlSignal *int
-	correlationSum        int
-	weightValue           int
+	// Internal Attributes
+	correlationSum int
+	weightValue    int
 }
 
-func NewSynapse() *Synapse {
+func NewSynapse() Synapse {
 	syn := Synapse{weightValue: -1, correlationSum: 0}
-	return &syn
+	return syn
 }
 
-// Evoke is invoked at time, T, to train the synapse on the active signal values and return the result of
-// the associational operation between the resulting signal values according to the synaptic weight. Here we use
-// a bipolar correlative Hebbian learning algorithm.
-func (syn *Synapse) Evoke(sValue int, correlationThreshold int) int {
-	if *syn.LearningControlSignal > 0 {
+//Evoke is invoked at time, T, to train the synapse on the training and feature signals and return the result of
+//the associational operation between the feature signal and the synaptic weight. For learning we use an optimized
+//correlative Hebbian learning algorithm for training, which prioritizes bit-shifting for multiplications and
+//performs +3:-1 incremental steps.
+func (syn *Synapse) Evoke(training int, association int, correlation int, learningControl int) int {
+	if learningControl > 0 {
 		if syn.weightValue != 1 {
-			a := *syn.AssociativeSignal
-			s := sValue
-			syn.correlationSum += 4 * a * s
-			syn.correlationSum -= a
-			if syn.correlationSum > correlationThreshold {
+			syn.correlationSum += 4 * association * training
+			syn.correlationSum -= association
+			if syn.correlationSum > correlation {
 				syn.weightValue = 1
 			}
 		}
 	}
-	syn.Value = syn.weightValue * *syn.AssociativeSignal
-	//fmt.Println("Synapse", &syn, "Evoked:", syn.Value, "via", syn.weightValue, "x", *syn.AssociativeSignal)
-	return syn.Value
+	return association * syn.weightValue
 }
