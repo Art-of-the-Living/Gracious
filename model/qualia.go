@@ -34,6 +34,10 @@ func (q *Quale) SetFeatures(array []int) {
 	}
 }
 
+func (q *Quale) SetQuale(instantaneousQ Quale) {
+	q.SetFeatures(instantaneousQ.GetFeatures())
+}
+
 // GetFeature returns the feature value at a given line of the Quale. If there is no feature available at a given line,
 // then GetFeature returns 0. This makes a quale compatible with objects larger than it's size.
 func (q *Quale) GetFeature(line int) (int, error) {
