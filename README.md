@@ -10,17 +10,26 @@ Furthermore, while the behaviour of these systems may exhibit properties of a "l
 learning framework. Gracious cognitive simulations utilize bipolar associations and optimized Hebbian learning to form
 associative relationships between phenomenal appearances and internal states.
 
+## The Theory
+
+The theory behind Gracious is largely based on the works of Dr. Pentti O. Haikonen. Dr. Haikonen developed the Haikonen
+Associative Neuron and the Haikonen Cognitive Architecture which Gracious structures are largely inspired by. Several
+modifications have been made to Dr. Haikonen's designs in the name of improved computational efficiency. These
+modifications have maintained there efficacy and are comparable in output. Unlike Haikonen, Gracious supports the
+position that the mind may be simulated on a computer. And not just an aspect, as has already been proven,
+but the entirety of mental processes.
+
 ## Getting Started
 
 
-###Modules
+### Modules
 
 The largest unit of the Gracious Cognitive Simulation Framework (GCSF) is the module. Modules represent specific
 functional purposes for a cluster of structured neuron groups. A module may serve memory, motor control, vision, or
 audition purposes, as well as many purposes novel to a computer. The simplest module to implement then is the "Console"
 module.
 
-####The Console module
+#### The Console module
 
 The package `gracious/memory/console` implements an all-in-one connection to a console window. Input to the system
 traverses a simple language pre-processing and feedback system with auto-associative temporal memory. This module
