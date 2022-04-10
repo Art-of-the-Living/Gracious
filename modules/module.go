@@ -6,4 +6,5 @@ import "github.com/KennethGrace/gracious/model"
 // phenomena. Output is produced via registered actions.
 type Module interface {
 	RegisterPhenomena(phenomena model.Phenomena) error
+	Begin(delay float32)
 }
