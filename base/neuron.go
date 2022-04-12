@@ -9,20 +9,12 @@ import (
 // Neurons "firing" state. The neuron should fire, if and only if, the synaptic inputs
 type Neuron struct {
 	// Internal Attributes
-	synapses []Synapse
+	synapses map[model.Address]Synapse
 }
 
-func NewNeuron(synapseCount int) Neuron {
-	synapses := make([]Synapse, synapseCount)
-	for i := 0; i < len(synapses); i++ {
-		synapses[i] = NewSynapse()
-	}
+func NewNeuron() Neuron {
+	synapses := make(map[model.Address]Synapse)
 	return Neuron{synapses: synapses}
-}
-
-type NeuronProducts struct {
-	index int
-	value int
 }
 
 // GetSumOfWeights returns the amount of synapses which have learnt their weight values. In a bipolar system, this is
@@ -30,8 +22,8 @@ type NeuronProducts struct {
 func (n *Neuron) GetSumOfWeights() int {
 	weightSum := 0
 	count := len(n.synapses)
-	for i := 0; i < count; i++ {
-		weightSum += n.synapses[i].weightValue
+	for _, syn := range n.synapses {
+		weightSum += syn.weightValue
 	}
 	return count + weightSum // Fancy.
 }
@@ -41,12 +33,12 @@ func (n *Neuron) GetSumOfWeights() int {
 // learning and returns the product of the bipolar synaptic weight and the feature of the associative Quale.
 func (n *Neuron) Evoke(training int, associative model.Quale, correlation int, learningControl int) int {
 	sum := 0
-	weightSum := 0
-	count := len(n.synapses)
-	for i := 0; i < count; i++ {
-		weightSum += n.synapses[i].weightValue
-		feature, _ := associative.GetFeature(i)
-		sum += n.synapses[i].Evoke(training, feature, correlation, learningControl)
+	for featureAddress, feature := range associative.GetFeatures() {
+		if syn, ok := n.synapses[featureAddress]; ok {
+			sum += syn.Evoke(training, feature, correlation, learningControl)
+		} else {
+			n.synapses[featureAddress] = NewSynapse()
+		}
 	}
 	return sum
 }

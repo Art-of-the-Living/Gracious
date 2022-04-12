@@ -5,12 +5,27 @@ import (
 	"fmt"
 )
 
-type Quale struct {
-	features []int
+type Address struct {
+	X int
+	Y int
 }
 
-func NewQuale(size int) Quale {
-	return Quale{features: make([]int, size)}
+func (a Address) vectorized() []int {
+	return []int{a.X, a.Y}
+}
+
+type Quale struct {
+	features map[Address]int
+}
+
+func NewQuale() Quale {
+	return Quale{features: make(map[Address]int)}
+}
+
+func (q *Quale) Zero() {
+	for addr := range q.features {
+		q.features[addr] = 0
+	}
 }
 
 func (q *Quale) Size() int {
@@ -19,18 +34,21 @@ func (q *Quale) Size() int {
 
 // SetFeature sets the feature value at a given line of the Quale. If there is no feature available at a given line,
 // then SetFeature returns an error.
-func (q *Quale) SetFeature(line int, strength int) error {
-	if line < len(q.features) {
-		q.features[line] = strength
+func (q *Quale) SetFeature(address Address, strength int) error {
+	if _, ok := q.features[address]; ok {
+		q.features[address] = strength
 		return nil
 	} else {
-		return errors.New(fmt.Sprint("Quale is of length", len(q.features), "but", line, "was write accessed"))
+		q.features[address] = strength
+		return errors.New(fmt.Sprint("Quale is located at", &q,
+			"Bad access! ", address.vectorized(), "was write accessed"))
 	}
 }
 
-func (q *Quale) SetFeatures(array []int) {
-	for i, value := range array {
-		_ = q.SetFeature(i, value)
+func (q *Quale) SetFeatures(array map[Address]int) {
+	q.features = make(map[Address]int)
+	for address, value := range array {
+		_ = q.SetFeature(address, value)
 	}
 }
 
@@ -40,16 +58,17 @@ func (q *Quale) SetQuale(instantaneousQ Quale) {
 
 // GetFeature returns the feature value at a given line of the Quale. If there is no feature available at a given line,
 // then GetFeature returns 0. This makes a quale compatible with objects larger than it's size.
-func (q *Quale) GetFeature(line int) (int, error) {
-	if line < len(q.features) {
-		return q.features[line], nil
+func (q *Quale) GetFeature(address Address) (int, error) {
+	if val, ok := q.features[address]; ok {
+		return val, nil
 	} else {
-		return 0, errors.New(fmt.Sprint("Quale is of length", len(q.features), "but", line, "was read accessed"))
+		return 0, errors.New(fmt.Sprint("Quale is located at", &q,
+			"Bad Access!", address.vectorized(), "was read accessed"))
 	}
 }
 
 // GetFeatures returns the complete array of features. This function should be used sparingly as it does not test
 // for length inequalities and trouble can arise when manually mapping the features array to signal lines.
-func (q *Quale) GetFeatures() []int {
+func (q *Quale) GetFeatures() map[Address]int {
 	return q.features
 }

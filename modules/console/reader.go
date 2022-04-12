@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"github.com/KennethGrace/gracious/base"
 	"github.com/KennethGrace/gracious/model"
+	"github.com/KennethGrace/gracious/modules/util"
 	"time"
 )
 
 func ASCIIToQuale(character rune) model.Quale {
-	quale := model.NewQuale(256)
-	_ = quale.SetFeature(int(character), 1)
+	quale := model.NewQuale()
+	_ = quale.SetFeature(model.Address{Y: int(character)}, 1)
 	return quale
 }
 
@@ -21,7 +22,7 @@ type ASCIIPhenomena struct {
 func (p ASCIIPhenomena) GetQuale() (model.Quale, error) {
 	character, _, err := p.Reader.ReadRune()
 	if err != nil {
-		return model.NewQuale(0), err
+		return model.NewQuale(), err
 	}
 	return ASCIIToQuale(character), nil
 }
@@ -31,23 +32,24 @@ func (p ASCIIPhenomena) GetQuale() (model.Quale, error) {
 // sensory pre-processing of simulated or imported external data. This is often useful for "neural debugging" of
 // the system.
 type ReadConsole struct {
-	components []*base.NeuronGroup
-	handoff    *base.NeuronGroup
-	Active     bool
-	phenomena  ASCIIPhenomena
+	handoff       *base.NeuronGroup
+	preprocessing []*base.NeuronGroup
+	feedback      util.Feedback
+	Active        bool
+	phenomena     ASCIIPhenomena
 }
 
 func NewReadConsole(reader *bufio.Reader) *ReadConsole {
 	p := ASCIIPhenomena{Reader: bufio.NewReader(reader)}
-	handoff := base.NewNeuronGroup(32, 256)
+	handoff := base.NewNeuronGroup()
 	rc := ReadConsole{phenomena: p, handoff: handoff}
 	return &rc
 }
 
 // Begin initializes the ReadConsole module and starts the looping call for inputs from the phenomena
 // attribute of the ReadConsole class which, if not set, will set itself to standard in at creation.
-func (rc *ReadConsole) Begin(delay int) {
-	q := model.NewQuale(256)
+func (rc *ReadConsole) Begin(delay float32) {
+	q := model.NewQuale()
 	rc.handoff.SetAssociation(&q)
 	rc.Active = true
 	for rc.Active {

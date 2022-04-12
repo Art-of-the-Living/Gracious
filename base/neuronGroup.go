@@ -4,7 +4,7 @@ import "github.com/KennethGrace/gracious/model"
 
 type NeuronGroup struct {
 	// Internal Attributes
-	neurons []Neuron
+	neurons map[model.Address]Neuron
 	// Inbound Attributes
 	main                       *model.Quale //At initialization a new Quale is made.
 	association                *model.Quale //At initialization a new Quale is made.
@@ -16,23 +16,18 @@ type NeuronGroup struct {
 	MainOut model.Quale
 }
 
-func NewNeuronGroup(neuronCount int, synapseCount int) *NeuronGroup {
-	neurons := make([]Neuron, neuronCount)
-	main := model.NewQuale(neuronCount)
-	associative := model.NewQuale(synapseCount)
+func NewNeuronGroup() *NeuronGroup {
+	neurons := make(map[model.Address]Neuron)
+	main := model.NewQuale()
+	associative := model.NewQuale()
 	correlationThresholdSignal := new(int)
 	learningControlSignal := new(int)
-	for i := 0; i < len(neurons); i++ {
-		neurons[i] = NewNeuron(synapseCount)
-		for j := 0; j < len(neurons[i].synapses); j++ {
-		}
-	}
 	ng := NeuronGroup{neurons: neurons}
 	ng.main = &main
 	ng.association = &associative
 	ng.CorrelationThresholdSignal = correlationThresholdSignal
 	ng.LearningControlSignal = learningControlSignal
-	ng.MainOut = model.NewQuale(neuronCount)
+	ng.MainOut = model.NewQuale()
 	return &ng
 }
 
@@ -47,20 +42,24 @@ func (ng *NeuronGroup) SetAssociation(q *model.Quale) {
 // Evoke updates the Neuron Group for the moment of time, T.
 func (ng *NeuronGroup) Evoke() {
 	sigMax := 0
-	sumLines := make([]int, len(ng.neurons))
-	for i := 0; i < len(ng.neurons); i++ {
-		training, _ := ng.main.GetFeature(i)
-		sum := ng.neurons[i].Evoke(training, *ng.association, *ng.CorrelationThresholdSignal, *ng.LearningControlSignal)
-		if sum > sigMax {
-			sigMax = sum
-		}
-		sumLines[i] = sum
-	}
-	for i := 0; i < len(sumLines); i++ {
-		if sumLines[i] < sigMax {
-			_ = ng.MainOut.SetFeature(i, 0)
+	rawQuale := model.NewQuale()
+	for featureAddress, feature := range ng.main.GetFeatures() {
+		if neuron, ok := ng.neurons[featureAddress]; ok {
+			sum := neuron.Evoke(feature, *ng.association, *ng.CorrelationThresholdSignal, *ng.LearningControlSignal)
+			if sum > sigMax {
+				sigMax = sum
+			}
+			_ = rawQuale.SetFeature(featureAddress, sum)
 		} else {
-			_ = ng.MainOut.SetFeature(i, 1)
+			ng.neurons[featureAddress] = NewNeuron()
+		}
+	}
+	ng.MainOut.Zero()
+	for address, value := range rawQuale.GetFeatures() {
+		if value >= sigMax {
+			_ = ng.MainOut.SetFeature(address, 1)
+		} else {
+			_ = ng.MainOut.SetFeature(address, 0)
 		}
 	}
 }
