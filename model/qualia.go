@@ -72,3 +72,11 @@ func (q *Quale) GetFeature(address Address) (int, error) {
 func (q *Quale) GetFeatures() map[Address]int {
 	return q.features
 }
+
+func (q *Quale) Strength() int {
+	sum := 0
+	for _, feature := range q.features {
+		sum += feature
+	}
+	return sum
+}

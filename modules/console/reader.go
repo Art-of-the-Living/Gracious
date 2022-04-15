@@ -3,11 +3,13 @@ package console
 import (
 	"bufio"
 	"fmt"
-	"github.com/KennethGrace/gracious/base"
 	"github.com/KennethGrace/gracious/model"
+	"github.com/KennethGrace/gracious/modules"
 	"github.com/KennethGrace/gracious/modules/util"
 	"time"
 )
+
+const ModuleName = "reader"
 
 func ASCIIToQuale(character rune) model.Quale {
 	quale := model.NewQuale()
@@ -32,34 +34,27 @@ func (p ASCIIPhenomena) GetQuale() (model.Quale, error) {
 // sensory pre-processing of simulated or imported external data. This is often useful for "neural debugging" of
 // the system.
 type ReadConsole struct {
-	handoff       *base.NeuronGroup
-	preprocessing []*base.NeuronGroup
-	feedback      util.Feedback
-	Active        bool
-	phenomena     ASCIIPhenomena
+	modules.Module
+	feedback util.Feedback
+	Active   bool
 }
 
 func NewReadConsole(reader *bufio.Reader) *ReadConsole {
 	p := ASCIIPhenomena{Reader: bufio.NewReader(reader)}
-	handoff := base.NewNeuronGroup()
-	rc := ReadConsole{phenomena: p, handoff: handoff}
+	rc := ReadConsole{}
+	rc.Phenomena = p
 	return &rc
 }
 
 // Begin initializes the ReadConsole module and starts the looping call for inputs from the phenomena
 // attribute of the ReadConsole class which, if not set, will set itself to standard in at creation.
-func (rc *ReadConsole) Begin(delay float32) {
+func (rc *ReadConsole) Begin() {
 	q := model.NewQuale()
-	rc.handoff.SetAssociation(&q)
 	rc.Active = true
 	for rc.Active {
-		instantaneousQ, _ := rc.phenomena.GetQuale()
+		instantaneousQ, _ := rc.Phenomena.GetQuale()
 		q.SetQuale(instantaneousQ)
 		fmt.Println(q)
 		time.Sleep(1 * time.Second)
 	}
-}
-
-func (rc *ReadConsole) RegisterPhenomena(phenomena model.Phenomena) error {
-	return nil
 }
