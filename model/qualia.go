@@ -80,3 +80,11 @@ func (q *Quale) Strength() int {
 	}
 	return sum
 }
+
+func (q *Quale) Decay() {
+	for address, feature := range q.features {
+		if feature > 1 {
+			_ = q.SetFeature(address, feature-1)
+		}
+	}
+}

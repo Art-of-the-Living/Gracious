@@ -37,9 +37,7 @@ func (ng *Group) Evoke(main model.Quale, association model.Quale) model.Quale {
 		}
 	}
 	for address, value := range newQuale.GetFeatures() {
-		if value >= sigMax {
-			_ = newQuale.SetFeature(address, 1)
-		} else {
+		if value < sigMax {
 			_ = newQuale.SetFeature(address, 0)
 		}
 	}

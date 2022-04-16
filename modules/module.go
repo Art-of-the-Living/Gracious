@@ -7,9 +7,10 @@ import "github.com/KennethGrace/gracious/model"
 type Module struct {
 	dispatch  *model.Dispatch
 	Phenomena model.Phenomena
+	Action    model.Action
 }
 
-func (m *Module) Begin() {
+func (m *Module) Begin(time int) {
 }
 
 func (m *Module) SetDispatch(dispatch *model.Dispatch) {

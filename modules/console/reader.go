@@ -9,8 +9,6 @@ import (
 	"time"
 )
 
-const ModuleName = "reader"
-
 func ASCIIToQuale(character rune) model.Quale {
 	quale := model.NewQuale()
 	_ = quale.SetFeature(model.Address{Y: int(character)}, 1)
@@ -48,13 +46,13 @@ func NewReadConsole(reader *bufio.Reader) *ReadConsole {
 
 // Begin initializes the ReadConsole module and starts the looping call for inputs from the phenomena
 // attribute of the ReadConsole class which, if not set, will set itself to standard in at creation.
-func (rc *ReadConsole) Begin() {
+func (rc *ReadConsole) Begin(delay int) {
 	q := model.NewQuale()
 	rc.Active = true
 	for rc.Active {
 		instantaneousQ, _ := rc.Phenomena.GetQuale()
 		q.SetQuale(instantaneousQ)
 		fmt.Println(q)
-		time.Sleep(1 * time.Second)
+		time.Sleep(time.Duration(delay) * time.Second)
 	}
 }

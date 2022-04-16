@@ -6,8 +6,8 @@ import "github.com/KennethGrace/gracious/model"
 // the same main quale type and quale. When evoked a cluster returns only the strongest quale. A cluster ensures that
 // quale are evoked associatively only by the proper quale type for the association.
 type Cluster struct {
-	binding string //The name of the system this cluster is a part of.
-	groups  map[string]*Group
+	binding string            //The name of the system this cluster is a part of.
+	groups  map[string]*Group //The component groups of this cluster.
 }
 
 func NewCluster(binding string) *Cluster {
@@ -20,6 +20,15 @@ func (c *Cluster) AddNewGroup(binding string) {
 	ng.LearningControlSignal = 0
 	ng.CorrelationThresholdSignal = 0
 	c.groups[binding] = ng
+}
+
+func (c *Cluster) AddNewGroups(bindings []string) {
+	for _, binding := range bindings {
+		ng := NewGroup(c.binding)
+		ng.LearningControlSignal = 0
+		ng.CorrelationThresholdSignal = 0
+		c.groups[binding] = ng
+	}
 }
 
 func (c *Cluster) Evoke(main model.Quale, associations map[string]model.Quale) model.Quale {
