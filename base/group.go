@@ -10,6 +10,7 @@ type Group struct {
 	// Inbound Attributes
 	CorrelationThresholdSignal int
 	LearningControlSignal      int
+	Association                model.Quale
 	// Outbound Attributes
 	Match   int
 	Novelty int
@@ -21,19 +22,23 @@ func NewGroup(binding string) *Group {
 	return &ng
 }
 
+func (g *Group) SetAssociation(a model.Quale) {
+	g.Association = a
+}
+
 // Evoke updates the Neuron Group for the moment of time, T.
-func (ng *Group) Evoke(main model.Quale, association model.Quale) model.Quale {
+func (g *Group) Evoke(main model.Quale) model.Quale {
 	sigMax := 0
 	newQuale := model.NewQuale()
 	for featureAddress, feature := range main.GetFeatures() {
-		if neuron, ok := ng.neurons[featureAddress]; ok {
-			sum := neuron.Evoke(feature, association, ng.CorrelationThresholdSignal, ng.LearningControlSignal)
+		if neuron, ok := g.neurons[featureAddress]; ok {
+			sum := neuron.Evoke(feature, g.Association, g.CorrelationThresholdSignal, g.LearningControlSignal)
 			if sum > sigMax {
 				sigMax = sum
 			}
 			_ = newQuale.SetFeature(featureAddress, sum)
 		} else {
-			ng.neurons[featureAddress] = NewNeuron()
+			g.neurons[featureAddress] = NewNeuron()
 		}
 	}
 	for address, value := range newQuale.GetFeatures() {

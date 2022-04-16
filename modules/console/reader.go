@@ -2,10 +2,9 @@ package console
 
 import (
 	"bufio"
-	"fmt"
+	"github.com/KennethGrace/gracious/base"
 	"github.com/KennethGrace/gracious/model"
 	"github.com/KennethGrace/gracious/modules"
-	"github.com/KennethGrace/gracious/modules/util"
 	"time"
 )
 
@@ -33,26 +32,25 @@ func (p ASCIIPhenomena) GetQuale() (model.Quale, error) {
 // the system.
 type ReadConsole struct {
 	modules.Module
-	feedback util.Feedback
+	Feedback *base.Cluster
 	Active   bool
 }
 
 func NewReadConsole(reader *bufio.Reader) *ReadConsole {
-	p := ASCIIPhenomena{Reader: bufio.NewReader(reader)}
 	rc := ReadConsole{}
-	rc.Phenomena = p
+	rc.Phenomena = ASCIIPhenomena{Reader: reader}
+	rc.Dispatch = model.NewDispatch("reader")
+	rc.Feedback = base.NewCluster("reader")
 	return &rc
 }
 
 // Begin initializes the ReadConsole module and starts the looping call for inputs from the phenomena
 // attribute of the ReadConsole class which, if not set, will set itself to standard in at creation.
 func (rc *ReadConsole) Begin(delay int) {
-	q := model.NewQuale()
 	rc.Active = true
 	for rc.Active {
 		instantaneousQ, _ := rc.Phenomena.GetQuale()
-		q.SetQuale(instantaneousQ)
-		fmt.Println(q)
+		rc.Dispatch.Distribute(instantaneousQ)
 		time.Sleep(time.Duration(delay) * time.Second)
 	}
 }

@@ -7,7 +7,7 @@ import "github.com/KennethGrace/gracious/model"
 // quale are evoked associatively only by the proper quale type for the association.
 type Cluster struct {
 	binding string            //The name of the system this cluster is a part of.
-	groups  map[string]*Group //The component groups of this cluster.
+	groups  map[string]*Group //The component groups of this cluster indexed by their linked association.
 }
 
 func NewCluster(binding string) *Cluster {
@@ -15,30 +15,32 @@ func NewCluster(binding string) *Cluster {
 	return &c
 }
 
-func (c *Cluster) AddNewGroup(binding string) {
+func (c *Cluster) AddNewGroup(binding string) func(quale model.Quale) {
 	ng := NewGroup(c.binding)
 	ng.LearningControlSignal = 0
 	ng.CorrelationThresholdSignal = 0
 	c.groups[binding] = ng
+	return ng.SetAssociation
 }
 
-func (c *Cluster) AddNewGroups(bindings []string) {
-	for _, binding := range bindings {
+func (c *Cluster) AddNewGroups(bindings []string) []func(quale model.Quale) {
+	funcArray := make([]func(quale model.Quale), len(bindings))
+	for i, binding := range bindings {
 		ng := NewGroup(c.binding)
 		ng.LearningControlSignal = 0
 		ng.CorrelationThresholdSignal = 0
 		c.groups[binding] = ng
+		funcArray[i] = ng.SetAssociation
 	}
+	return funcArray
 }
 
-func (c *Cluster) Evoke(main model.Quale, associations map[string]model.Quale) model.Quale {
+func (c *Cluster) Evoke(main model.Quale) model.Quale {
 	strongestQuale := model.NewQuale()
-	for name, group := range c.groups {
-		if association, ok := associations[name]; ok {
-			q := group.Evoke(main, association)
-			if q.Strength() > strongestQuale.Strength() {
-				strongestQuale = q
-			}
+	for _, group := range c.groups {
+		q := group.Evoke(main)
+		if q.Strength() > strongestQuale.Strength() {
+			strongestQuale = q
 		}
 	}
 	return strongestQuale

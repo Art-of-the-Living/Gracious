@@ -2,10 +2,9 @@ package console
 
 import (
 	"bufio"
+	"github.com/KennethGrace/gracious/base"
 	"github.com/KennethGrace/gracious/model"
 	"github.com/KennethGrace/gracious/modules"
-	"github.com/KennethGrace/gracious/modules/util"
-	"os"
 	"time"
 )
 
@@ -31,13 +30,15 @@ func (a ASCIIAction) SetQuale(quale model.Quale) error {
 
 type WriteConsole struct {
 	modules.Module
-	feedback util.Feedback
+	Feedback *base.Cluster
 	Active   bool
 }
 
-func NewWriteConsole() *WriteConsole {
+func NewWriteConsole(writer *bufio.Writer) *WriteConsole {
 	wc := WriteConsole{}
-	wc.Action = ASCIIAction{Writer: bufio.NewWriter(os.Stdout)}
+	wc.Action = ASCIIAction{Writer: writer}
+	wc.Dispatch = model.NewDispatch("writer")
+	wc.Feedback = base.NewCluster("writer")
 	return &wc
 }
 
