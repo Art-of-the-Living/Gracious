@@ -47,6 +47,6 @@ func (wc *WriteConsole) Begin(delay int) {
 	wc.Active = true
 	for wc.Active {
 		_ = wc.Action.SetQuale(q)
-		time.Sleep(time.Duration(delay) * time.Second)
+		time.Sleep(time.Duration(delay) * time.Millisecond)
 	}
 }

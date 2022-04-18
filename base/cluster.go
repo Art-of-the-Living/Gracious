@@ -35,6 +35,12 @@ func (c *Cluster) AddNewGroups(bindings []string) []func(quale model.Quale) {
 	return funcArray
 }
 
+func (c *Cluster) SetPassThrough(pass bool) {
+	for _, group := range c.groups {
+		group.PassThrough = pass
+	}
+}
+
 func (c *Cluster) Evoke(main model.Quale) model.Quale {
 	strongestQuale := model.NewQuale()
 	for _, group := range c.groups {

@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 type Address struct {
@@ -73,6 +74,10 @@ func (q *Quale) GetFeatures() map[Address]int {
 	return q.features
 }
 
+func (q *Quale) AdjustFeature(address Address, value int) {
+	q.features[address] = q.features[address] + value
+}
+
 func (q *Quale) Strength() int {
 	sum := 0
 	for _, feature := range q.features {
@@ -87,4 +92,12 @@ func (q *Quale) Decay() {
 			_ = q.SetFeature(address, feature-1)
 		}
 	}
+}
+
+func (q *Quale) Represent() string {
+	featureRepresentations := make([]string, 0)
+	for address, feature := range q.features {
+		featureRepresentations = append(featureRepresentations, fmt.Sprint(address.vectorized(), "(", feature, ")"))
+	}
+	return strings.Join(featureRepresentations, ", ")
 }

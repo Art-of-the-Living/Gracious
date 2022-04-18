@@ -1,13 +1,13 @@
 package vision
 
 import (
+	"github.com/KennethGrace/gracious/base"
 	"github.com/KennethGrace/gracious/modules"
-	"github.com/KennethGrace/gracious/modules/util"
 )
 
 type Vision struct {
 	modules.Module
-	feedback util.Feedback
+	feedback base.Feedback
 }
 
 func NewVision(vertical int, horizontal int) *Vision {

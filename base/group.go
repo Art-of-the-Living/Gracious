@@ -1,6 +1,8 @@
 package base
 
-import "github.com/KennethGrace/gracious/model"
+import (
+	"github.com/KennethGrace/gracious/model"
+)
 
 // Group is a set of neurons with a specific associative quale type input and a specific main quale type input and output.
 type Group struct {
@@ -11,6 +13,7 @@ type Group struct {
 	CorrelationThresholdSignal int
 	LearningControlSignal      int
 	Association                model.Quale
+	PassThrough                bool
 	// Outbound Attributes
 	Match   int
 	Novelty int
@@ -30,13 +33,16 @@ func (g *Group) SetAssociation(a model.Quale) {
 func (g *Group) Evoke(main model.Quale) model.Quale {
 	sigMax := 0
 	newQuale := model.NewQuale()
+	if g.PassThrough {
+		newQuale = main
+	}
 	for featureAddress, feature := range main.GetFeatures() {
 		if neuron, ok := g.neurons[featureAddress]; ok {
 			sum := neuron.Evoke(feature, g.Association, g.CorrelationThresholdSignal, g.LearningControlSignal)
 			if sum > sigMax {
 				sigMax = sum
 			}
-			_ = newQuale.SetFeature(featureAddress, sum)
+			newQuale.AdjustFeature(featureAddress, sum)
 		} else {
 			g.neurons[featureAddress] = NewNeuron()
 		}
