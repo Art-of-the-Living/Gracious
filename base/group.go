@@ -49,7 +49,7 @@ func (g *Group) Evoke(main model.Quale) model.Quale {
 	}
 	for address, value := range newQuale.GetFeatures() {
 		if value < sigMax {
-			_ = newQuale.SetFeature(address, 0)
+			newQuale.SetFeature(address, 0)
 		}
 	}
 	return newQuale

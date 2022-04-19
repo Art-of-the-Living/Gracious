@@ -17,20 +17,23 @@ func NewAutoAssociativeMemory(binding string) *AutoAssociativeMemory {
 func (aam *AutoAssociativeMemory) Evoke(main model.Quale, association model.Quale) model.Quale {
 	sigMax := 0
 	newQuale := model.NewQuale()
+	if aam.PassThrough {
+		newQuale = main
+	}
 	for featureAddress, feature := range main.GetFeatures() {
 		if neuron, ok := aam.neurons[featureAddress]; ok {
 			sum := neuron.Evoke(feature, main, aam.CorrelationThresholdSignal, aam.LearningControlSignal)
 			if sum > sigMax {
 				sigMax = sum
 			}
-			_ = newQuale.SetFeature(featureAddress, sum)
+			newQuale.SetFeature(featureAddress, sum)
 		} else {
 			aam.neurons[featureAddress] = NewNeuron()
 		}
 	}
 	for address, value := range newQuale.GetFeatures() {
 		if value < sigMax {
-			_ = newQuale.SetFeature(address, 0)
+			newQuale.SetFeature(address, 0)
 		}
 	}
 	return newQuale

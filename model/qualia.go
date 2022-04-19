@@ -39,16 +39,13 @@ func (q *Quale) Size() int {
 
 // SetFeature sets the feature value at a given address of the Quale. If there is no feature available at any given
 // address, then SetFeature returns an error.
-func (q *Quale) SetFeature(address Address, strength int) error {
-	if _, ok := q.features[address]; ok {
-		if strength != 0 {
-			q.features[address] = strength
-			return nil
-		}
-		return nil
+func (q *Quale) SetFeature(address Address, strength int) {
+	if strength != 0 {
+		q.features[address] = strength
 	} else {
-		return errors.New(fmt.Sprint("Quale is located at", &q,
-			"Bad access! ", address.vectorized(), "was write accessed"))
+		if _, ok := q.features[address]; ok {
+			delete(q.features, address)
+		}
 	}
 }
 
@@ -56,7 +53,7 @@ func (q *Quale) SetFeature(address Address, strength int) error {
 func (q *Quale) SetFeatures(array map[Address]int) {
 	q.features = make(map[Address]int)
 	for address, value := range array {
-		_ = q.SetFeature(address, value)
+		q.SetFeature(address, value)
 	}
 }
 
@@ -116,7 +113,7 @@ func (q *Quale) Strength() int {
 func (q *Quale) Decay() {
 	for address, feature := range q.features {
 		if feature > 1 {
-			_ = q.SetFeature(address, feature-1)
+			q.SetFeature(address, feature-1)
 		}
 	}
 }

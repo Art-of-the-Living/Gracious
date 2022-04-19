@@ -11,7 +11,7 @@ import (
 
 func ASCIIToQuale(character rune) model.Quale {
 	quale := model.NewQuale()
-	_ = quale.SetFeature(model.Address{Y: int(character)}, 1)
+	quale.SetFeature(model.Address{Y: int(character)}, 1)
 	return quale
 }
 
@@ -50,7 +50,10 @@ func NewReadConsole(reader *bufio.Reader) *ReadConsole {
 func (rc *ReadConsole) Begin(delay int) {
 	rc.Active = true
 	for rc.Active {
-		instantaneousQ, _ := rc.Phenomena.GetQuale()
+		instantaneousQ, err := rc.Phenomena.GetQuale()
+		if err != nil {
+			panic("Reader crashing!")
+		}
 		result := rc.Feedback.Evoke(instantaneousQ)
 		rc.Dispatch.Distribute(result)
 		fmt.Println("Input Quale:", result.Represent())
