@@ -51,7 +51,6 @@ func (q *Quale) SetFeature(address Address, strength int) {
 
 // SetFeatures sets all the features of a quale equal to all the values at corresponding addresses.
 func (q *Quale) SetFeatures(array map[Address]int) {
-	q.features = make(map[Address]int)
 	for address, value := range array {
 		q.SetFeature(address, value)
 	}
@@ -87,6 +86,24 @@ func (q *Quale) AdjustFeature(address Address, value int) {
 		q.features[address] = newFeature
 	} else {
 		delete(q.features, address)
+	}
+}
+
+// ShiftX will shift all the features on the X address of the quale by the parameter "step".
+func (q *Quale) ShiftX(step int) {
+	oldAdders := make([]Address, len(q.features))
+	shifted := make(map[Address]int, len(q.features))
+	i := 0
+	for addr, feature := range q.features {
+		newAddr := addr
+		newAddr.X += step
+		shifted[newAddr] = feature
+		oldAdders[i] = addr
+		i++
+	}
+	q.SetFeatures(shifted)
+	for _, addr := range oldAdders {
+		delete(q.features, addr)
 	}
 }
 

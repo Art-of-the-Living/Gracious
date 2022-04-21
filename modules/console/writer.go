@@ -30,7 +30,7 @@ func (a ASCIIAction) SetQuale(quale model.Quale) error {
 
 type WriteConsole struct {
 	modules.Module
-	Feedback *base.Cluster
+	Feedback *base.ParallelCluster
 	Active   bool
 }
 

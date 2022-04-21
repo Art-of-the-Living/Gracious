@@ -33,8 +33,9 @@ func (p ASCIIPhenomena) GetQuale() (model.Quale, error) {
 // the system.
 type ReadConsole struct {
 	modules.Module
+	TemporalMemory   model.Quale
 	FeedbackPoint    *base.Group
-	AssociationPoint *base.Cluster
+	AssociationPoint *base.ParallelCluster
 	AAM              *base.AutoAssociativeMemory
 	Active           bool
 }
@@ -54,12 +55,20 @@ func NewReadConsole(reader *bufio.Reader) *ReadConsole {
 // attribute of the ReadConsole class which, if not set, will set itself to standard in at creation.
 func (rc *ReadConsole) Begin(delay int) {
 	rc.Active = true
+	formatQuale := model.NewQuale()
 	for rc.Active {
 		instantaneousQ, err := rc.Phenomena.GetQuale()
 		if err != nil {
 			panic("Reader crashing!")
 		}
-		feedbackResult := rc.FeedbackPoint.Evoke(instantaneousQ)
+		if value, _ := instantaneousQ.GetFeature(model.Address{Y: 10}); value > 0 {
+			formatQuale.Clear()
+		} else {
+			formatQuale.ShiftX(1)
+		}
+		formatQuale.SetQuale(instantaneousQ)
+		fmt.Println("Format Quale:", formatQuale.Represent())
+		feedbackResult := rc.FeedbackPoint.Evoke(formatQuale)
 		rc.Dispatch.Distribute(feedbackResult)
 		associatedResult := rc.AssociationPoint.Evoke(feedbackResult)
 		aamResult := rc.AAM.Evoke(associatedResult)
