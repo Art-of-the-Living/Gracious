@@ -15,29 +15,31 @@ func NewCluster(binding string) *Cluster {
 	return &c
 }
 
-func (c *Cluster) AddNewGroup(binding string) func(quale model.Quale) {
+func (c *Cluster) AddNewGroup(binding string) *Group {
 	ng := NewGroup(c.binding)
-	ng.LearningControlSignal = 0
-	ng.CorrelationThresholdSignal = 0
 	c.groups[binding] = ng
-	return ng.SetAssociation
+	return ng
 }
 
-func (c *Cluster) AddNewGroups(bindings []string) []func(quale model.Quale) {
-	funcArray := make([]func(quale model.Quale), len(bindings))
+func (c *Cluster) AddNewGroups(bindings []string) []*Group {
+	groups := make([]*Group, len(bindings))
 	for i, binding := range bindings {
 		ng := NewGroup(c.binding)
-		ng.LearningControlSignal = 0
-		ng.CorrelationThresholdSignal = 0
 		c.groups[binding] = ng
-		funcArray[i] = ng.SetAssociation
+		groups[i] = ng
 	}
-	return funcArray
+	return groups
 }
 
 func (c *Cluster) SetPassThrough(pass bool) {
 	for _, group := range c.groups {
 		group.PassThrough = pass
+	}
+}
+
+func (c *Cluster) SetCorrelationThreshold(signal int) {
+	for _, group := range c.groups {
+		group.CorrelationThresholdSignal = signal
 	}
 }
 

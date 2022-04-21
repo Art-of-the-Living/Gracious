@@ -23,11 +23,11 @@ func NewSynapse() Synapse {
 func (syn *Synapse) Evoke(training int, association int, correlation int, learningControl int) int {
 	if learningControl > 0 {
 		if syn.correlationSum > correlation {
-			syn.correlationSum += 4 * association * training
-			syn.correlationSum -= association
 			syn.weightValue = 1
 		} else {
 			syn.weightValue = -1
+			syn.correlationSum += 4 * association * training
+			syn.correlationSum -= association
 		}
 	}
 	return association * syn.weightValue

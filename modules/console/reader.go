@@ -40,7 +40,7 @@ type ReadConsole struct {
 func NewReadConsole(reader *bufio.Reader) *ReadConsole {
 	rc := ReadConsole{}
 	rc.Phenomena = ASCIIPhenomena{Reader: reader}
-	rc.Dispatch = model.NewDispatch("reader")
+	rc.Dispatch = base.NewDispatch("reader")
 	rc.Feedback = base.NewFeedback("reader")
 	return &rc
 }
@@ -54,6 +54,7 @@ func (rc *ReadConsole) Begin(delay int) {
 		if err != nil {
 			panic("Reader crashing!")
 		}
+		rc.Feedback.SetCorrelationThreshold(3)
 		result := rc.Feedback.Evoke(instantaneousQ)
 		rc.Dispatch.Distribute(result)
 		fmt.Println("Input Quale:", result.Represent())

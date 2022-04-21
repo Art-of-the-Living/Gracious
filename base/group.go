@@ -21,7 +21,7 @@ type Group struct {
 
 func NewGroup(binding string) *Group {
 	neurons := make(map[model.Address]Neuron)
-	ng := Group{neurons: neurons, binding: binding}
+	ng := Group{neurons: neurons, binding: binding, LearningControlSignal: 1}
 	return &ng
 }
 

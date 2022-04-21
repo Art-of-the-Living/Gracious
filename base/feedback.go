@@ -5,24 +5,22 @@ import (
 )
 
 type Feedback struct {
+	strongestQuale model.Quale
 	*Cluster
 }
 
 func NewFeedback(binding string) *Feedback {
 	f := Feedback{}
 	f.Cluster = NewCluster(binding)
+	f.strongestQuale = model.NewQuale()
 	f.SetPassThrough(true)
 	return &f
 }
 
 func (f *Feedback) Evoke(main model.Quale) model.Quale {
-	strongestQuale := model.NewQuale()
 	for _, group := range f.groups {
 		group.PassThrough = true
-		q := group.Evoke(main)
-		if q.Strength() > strongestQuale.Strength() {
-			strongestQuale = q
-		}
 	}
-	return strongestQuale
+	q := f.Cluster.Evoke(main)
+	return q
 }

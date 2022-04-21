@@ -37,7 +37,7 @@ type WriteConsole struct {
 func NewWriteConsole(writer *bufio.Writer) *WriteConsole {
 	wc := WriteConsole{}
 	wc.Action = ASCIIAction{Writer: writer}
-	wc.Dispatch = model.NewDispatch("writer")
+	wc.Dispatch = base.NewDispatch("writer")
 	wc.Feedback = base.NewCluster("writer")
 	return &wc
 }
