@@ -90,6 +90,23 @@ func (q *Quale) AdjustFeature(address Address, value int) {
 	}
 }
 
+// WinnersTakeAll wipes the quale of any and all features which do not meet the threshold value. By default, the
+// threshold value is equal to the maximum feature. The "gap" parameter is the amount of tolerable difference between
+// the maximum feature and the threshold.
+func (q *Quale) WinnersTakeAll(gap int) {
+	max := 0
+	for _, feature := range q.features {
+		if feature > max {
+			max = feature
+		}
+	}
+	for addr, feature := range q.features {
+		if feature < (max - gap) {
+			delete(q.features, addr)
+		}
+	}
+}
+
 // Clear removes every feature from the quale. Effectively resetting all values to 0 and reducing the size of the quale.
 // This should be called to avoid any overwriting.
 func (q *Quale) Clear() {

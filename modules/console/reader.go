@@ -33,15 +33,20 @@ func (p ASCIIPhenomena) GetQuale() (model.Quale, error) {
 // the system.
 type ReadConsole struct {
 	modules.Module
-	Feedback *base.Feedback
-	Active   bool
+	FeedbackPoint    *base.Group
+	AssociationPoint *base.Cluster
+	AAM              *base.AutoAssociativeMemory
+	Active           bool
 }
 
 func NewReadConsole(reader *bufio.Reader) *ReadConsole {
 	rc := ReadConsole{}
 	rc.Phenomena = ASCIIPhenomena{Reader: reader}
+	rc.FeedbackPoint = base.NewGroup("reader")
+	rc.FeedbackPoint.PassThrough = true
 	rc.Dispatch = base.NewDispatch("reader")
-	rc.Feedback = base.NewFeedback("reader")
+	rc.AssociationPoint = base.NewCluster("reader")
+	rc.AAM = base.NewAutoAssociativeMemory("reader")
 	return &rc
 }
 
@@ -54,10 +59,14 @@ func (rc *ReadConsole) Begin(delay int) {
 		if err != nil {
 			panic("Reader crashing!")
 		}
-		rc.Feedback.SetCorrelationThreshold(3)
-		result := rc.Feedback.Evoke(instantaneousQ)
-		rc.Dispatch.Distribute(result)
-		fmt.Println("Input Quale:", result.Represent())
+		feedbackResult := rc.FeedbackPoint.Evoke(instantaneousQ)
+		rc.Dispatch.Distribute(feedbackResult)
+		associatedResult := rc.AssociationPoint.Evoke(feedbackResult)
+		aamResult := rc.AAM.Evoke(associatedResult)
+		aamResult.WinnersTakeAll(0)
+		rc.FeedbackPoint.Association = aamResult
+		fmt.Println("Input Quale:", feedbackResult.Represent())
+		fmt.Println("Output Quale:", aamResult.Represent())
 		time.Sleep(time.Duration(delay) * time.Millisecond)
 	}
 }

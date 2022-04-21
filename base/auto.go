@@ -14,7 +14,7 @@ func NewAutoAssociativeMemory(binding string) *AutoAssociativeMemory {
 }
 
 // Evoke updates the Neuron Group for the moment of time, T.
-func (aam *AutoAssociativeMemory) Evoke(main model.Quale, association model.Quale) model.Quale {
+func (aam *AutoAssociativeMemory) Evoke(main model.Quale) model.Quale {
 	sigMax := 0
 	newQuale := model.NewQuale()
 	if aam.PassThrough {
