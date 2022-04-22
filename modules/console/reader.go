@@ -1,11 +1,11 @@
 package console
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/KennethGrace/gracious/base"
 	"github.com/KennethGrace/gracious/model"
 	"github.com/KennethGrace/gracious/modules"
+	"io"
 	"time"
 )
 
@@ -16,7 +16,7 @@ func ASCIIToQuale(character rune) model.Quale {
 }
 
 type ASCIIPhenomena struct {
-	Reader *bufio.Reader
+	Reader io.RuneReader
 }
 
 func (p ASCIIPhenomena) GetQuale() (model.Quale, error) {
@@ -40,7 +40,7 @@ type ReadConsole struct {
 	Active           bool
 }
 
-func NewReadConsole(reader *bufio.Reader) *ReadConsole {
+func NewReadConsole(reader io.RuneReader) *ReadConsole {
 	rc := ReadConsole{}
 	rc.Phenomena = ASCIIPhenomena{Reader: reader}
 	rc.FeedbackPoint = base.NewGroup("reader")
