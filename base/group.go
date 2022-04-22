@@ -31,7 +31,6 @@ func (g *Group) SetAssociation(a model.Quale) {
 
 // Evoke updates the Neuron Group for the moment of time, T.
 func (g *Group) Evoke(main model.Quale) model.Quale {
-	sigMax := 0
 	newQuale := model.NewQuale()
 	if g.PassThrough {
 		newQuale = main
@@ -39,18 +38,11 @@ func (g *Group) Evoke(main model.Quale) model.Quale {
 	for featureAddress, feature := range main.GetFeatures() {
 		if neuron, ok := g.neurons[featureAddress]; ok {
 			sum := neuron.Evoke(feature, g.Association, g.CorrelationThresholdSignal, g.LearningControlSignal)
-			if sum > sigMax {
-				sigMax = sum
-			}
 			newQuale.AdjustFeature(featureAddress, sum)
 		} else {
 			g.neurons[featureAddress] = NewNeuron()
 		}
 	}
-	for address, value := range newQuale.GetFeatures() {
-		if value < sigMax {
-			newQuale.SetFeature(address, 0)
-		}
-	}
+	newQuale.WinnersTakeAll(0)
 	return newQuale
 }

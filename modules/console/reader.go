@@ -33,15 +33,21 @@ func (p ASCIIPhenomena) GetQuale() (model.Quale, error) {
 // the system.
 type ReadConsole struct {
 	modules.Module
-	Feedback *base.Feedback
-	Active   bool
+	TemporalMemory   model.Quale
+	FeedbackPoint    *base.Group
+	AssociationPoint *base.ParallelCluster
+	AAM              *base.AutoAssociativeMemory
+	Active           bool
 }
 
 func NewReadConsole(reader *bufio.Reader) *ReadConsole {
 	rc := ReadConsole{}
 	rc.Phenomena = ASCIIPhenomena{Reader: reader}
+	rc.FeedbackPoint = base.NewGroup("reader")
+	rc.FeedbackPoint.PassThrough = true
 	rc.Dispatch = base.NewDispatch("reader")
-	rc.Feedback = base.NewFeedback("reader")
+	rc.AssociationPoint = base.NewCluster("reader")
+	rc.AAM = base.NewAutoAssociativeMemory("reader")
 	return &rc
 }
 
@@ -49,15 +55,27 @@ func NewReadConsole(reader *bufio.Reader) *ReadConsole {
 // attribute of the ReadConsole class which, if not set, will set itself to standard in at creation.
 func (rc *ReadConsole) Begin(delay int) {
 	rc.Active = true
+	formatQuale := model.NewQuale()
 	for rc.Active {
 		instantaneousQ, err := rc.Phenomena.GetQuale()
 		if err != nil {
 			panic("Reader crashing!")
 		}
-		rc.Feedback.SetCorrelationThreshold(3)
-		result := rc.Feedback.Evoke(instantaneousQ)
-		rc.Dispatch.Distribute(result)
-		fmt.Println("Input Quale:", result.Represent())
+		if value, _ := instantaneousQ.GetFeature(model.Address{Y: 10}); value > 0 {
+			formatQuale.Clear()
+		} else {
+			formatQuale.ShiftX(1)
+		}
+		formatQuale.SetQuale(instantaneousQ)
+		fmt.Println("Format Quale:", formatQuale.Represent())
+		feedbackResult := rc.FeedbackPoint.Evoke(formatQuale)
+		rc.Dispatch.Distribute(feedbackResult)
+		associatedResult := rc.AssociationPoint.Evoke(feedbackResult)
+		aamResult := rc.AAM.Evoke(associatedResult)
+		aamResult.WinnersTakeAll(0)
+		rc.FeedbackPoint.Association = aamResult
+		fmt.Println("Input Quale:", feedbackResult.Represent())
+		fmt.Println("Output Quale:", aamResult.Represent())
 		time.Sleep(time.Duration(delay) * time.Millisecond)
 	}
 }
