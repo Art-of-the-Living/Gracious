@@ -6,25 +6,15 @@ package base
 type Cluster struct {
 	binding      string            //The name of the system this cluster is a part of.
 	groups       map[string]*Group //The component groups of this cluster indexed by their linked association.
-	Destinations map[string]chan Quale
-	Main         chan Quale
+	Destinations map[string]chan DistributedSignal
+	Main         chan DistributedSignal
 	Active       bool
 }
 
 func NewCluster(binding string) *Cluster {
 	c := Cluster{binding: binding, groups: make(map[string]*Group)}
-	c.Destinations = make(map[string]chan Quale)
+	c.Destinations = make(map[string]chan DistributedSignal)
 	return &c
-}
-
-func (c *Cluster) AddDestination(binding string, channel chan Quale) {
-	c.Destinations[binding] = channel
-}
-
-func (c *Cluster) AddNewGroup(binding string) *Group {
-	ng := NewGroup(c.binding)
-	c.groups[binding] = ng
-	return ng
 }
 
 func (c *Cluster) SetPassThrough(pass bool) {
@@ -39,23 +29,28 @@ func (c *Cluster) SetCorrelationThreshold(signal int) {
 	}
 }
 
-func (c *Cluster) Evoke() {
+// Evoke will test the clusters groups for possible signals.
+func (c *Cluster) Evoke(main DistributedSignal, associates map[string]DistributedSignal) DistributedSignal {
 	strongestQuale := NewQuale()
-	main := <-c.Main
-	out := make(map[string]chan Quale, len(c.groups))
-	for binding, group := range c.groups {
-		out[binding] = make(chan Quale)
-		go group.Evoke(main, out[binding])
-	}
-	for binding, _ := range c.groups {
-		out := <-out[binding]
-		if out.Strength() > strongestQuale.Strength() {
-			strongestQuale = out
+	newGroups := make(map[string]*Group)
+	// Test each group for firing patterns. If no group exists to handle the associated signal, create one.
+	for binding, signal := range associates {
+		if group, ok := c.groups[binding]; ok {
+			go group.Evoke(main, signal)
+		} else {
+			newGroups[binding] = NewGroup(binding)
 		}
 	}
-	for _, destination := range c.Destinations {
-		select {
-		case destination <- strongestQuale:
+	// Receive the firing patterns of each group and
+	for _, group := range c.groups {
+		testPattern := <-group.firingPattern
+		if testPattern.Strength() > strongestQuale.Strength() {
+			strongestQuale = testPattern
 		}
 	}
+	// Add any newly created groups to the cluster groups
+	for newBinding, newGroup := range newGroups {
+		c.groups[newBinding] = newGroup
+	}
+	return strongestQuale
 }

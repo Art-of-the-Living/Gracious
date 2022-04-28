@@ -6,11 +6,12 @@ package base
 type Neuron struct {
 	// Internal Attributes
 	synapses map[Address]Synapse
+	axon     chan int
 }
 
-func NewNeuron() Neuron {
+func NewNeuron() *Neuron {
 	synapses := make(map[Address]Synapse)
-	return Neuron{synapses: synapses}
+	return &Neuron{synapses: synapses, axon: make(chan int)}
 }
 
 // GetSumOfWeights returns the amount of synapses which have learnt their weight values. In a bipolar system, this is
@@ -24,17 +25,15 @@ func (n *Neuron) GetSumOfWeights() int {
 	return count + weightSum // Fancy.
 }
 
-// Evoke retrieves the strength of the Neuronal signal. The strength is equivalent to the sum of the synaptic
-// evocations for a given associative Quale. A synaptic evocation, retrieved with Synapse.Evoke(), triggers synaptic
-// learning and returns the product of the bipolar synaptic weight and the feature of the associative Quale.
-func (n *Neuron) Evoke(training int, associative Quale, correlation int, learningControl int) int {
+// Evoke tests the neuron for firing and writes the fired value to the 'axon' channel.
+func (n *Neuron) Evoke(main int, associative DistributedSignal, correlation int, learningControl int) {
 	sum := 0
 	for featureAddress, feature := range associative.GetFeatures() {
 		if syn, ok := n.synapses[featureAddress]; ok {
-			sum += syn.Evoke(training, feature, correlation, learningControl)
+			sum += syn.Evoke(main, feature, correlation, learningControl)
 		} else {
 			n.synapses[featureAddress] = NewSynapse()
 		}
 	}
-	return sum
+	n.axon <- sum
 }

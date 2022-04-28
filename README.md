@@ -7,7 +7,8 @@
 Gracious is a simulation framework for the cognitive systems which give rise to consciousness. While these systems are
 inspired by their biological implementations in the human brain, this is not meant to be neuro-biological simulation.
 Furthermore, while the behaviour of these systems may exhibit properties of a "learning machine" this is not a machine
-learning framework.
+learning framework. There is no back-propagation or gradient descent. Instead, Gracious rests, fundamentally, on
+the processing of associative operations between distributed signal representations. 
 
 ## The Theory
 
