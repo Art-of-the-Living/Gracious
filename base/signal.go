@@ -25,10 +25,10 @@ type DistributedSignal struct {
 	features map[Address]int
 }
 
-// NewQuale returns a new DistributedSignal initialized with no features set. The DistributedSignal's size at this point is 0,
+// NewDistributedSignal returns a new DistributedSignal initialized with no features set. The DistributedSignal's size at this point is 0,
 // and it occupies very little space in the system. As features are set more, more will populate the quale. Zero values
 // will never be set, as the 0 is assumed by the absence of a feature.
-func NewQuale() DistributedSignal {
+func NewDistributedSignal() DistributedSignal {
 	return DistributedSignal{features: make(map[Address]int)}
 }
 

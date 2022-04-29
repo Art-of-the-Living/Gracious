@@ -31,7 +31,7 @@ func (c *Cluster) SetCorrelationThreshold(signal int) {
 
 // Evoke will test the clusters groups for possible signals.
 func (c *Cluster) Evoke(main DistributedSignal, associates map[string]DistributedSignal) DistributedSignal {
-	strongestQuale := NewQuale()
+	strongestSignal := NewDistributedSignal()
 	newGroups := make(map[string]*Group)
 	// Test each group for firing patterns. If no group exists to handle the associated signal, create one.
 	for binding, signal := range associates {
@@ -44,13 +44,13 @@ func (c *Cluster) Evoke(main DistributedSignal, associates map[string]Distribute
 	// Receive the firing patterns of each group and
 	for _, group := range c.groups {
 		testPattern := <-group.firingPattern
-		if testPattern.Strength() > strongestQuale.Strength() {
-			strongestQuale = testPattern
+		if testPattern.Strength() > strongestSignal.Strength() {
+			strongestSignal = testPattern
 		}
 	}
 	// Add any newly created groups to the cluster groups
 	for newBinding, newGroup := range newGroups {
 		c.groups[newBinding] = newGroup
 	}
-	return strongestQuale
+	return strongestSignal
 }

@@ -26,7 +26,7 @@ func NewGroup(binding string) *Group {
 }
 
 func (g *Group) Evoke(main DistributedSignal, association DistributedSignal) {
-	firePattern := NewQuale()
+	firePattern := NewDistributedSignal()
 	newNeurons := make(map[Address]*Neuron)
 	// Pass the input pattern through to the output pattern if this group is set for pass-through
 	if g.PassThrough {
