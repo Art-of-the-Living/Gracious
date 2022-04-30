@@ -42,9 +42,11 @@ func NewDistributedSignal(name string) DistributedSignal {
 
 // Composite will add all the features of B to the features of A. Where-ever there is overlap the features are summed.
 func (q *DistributedSignal) Composite(signal DistributedSignal) {
-	for addr := range q.Features {
-		if value, ok := signal.Features[addr]; ok {
-			q.Features[addr] += value
+	for addr, feature := range signal.Features {
+		if _, ok := q.Features[addr]; ok {
+			q.Features[addr] += feature
+		} else {
+			q.Features[addr] = feature
 		}
 	}
 }
@@ -71,7 +73,7 @@ func (q *DistributedSignal) ShiftX(step int) {
 // will remain present in the signal. The gap parameter permits a level of tolerance for features which almost meet
 // with max threshold.
 func (q *DistributedSignal) WinnersTakeAll(gap int) {
-	max := 0
+	max := 1
 	for _, feature := range q.Features {
 		if feature > max {
 			max = feature

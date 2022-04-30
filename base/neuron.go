@@ -5,12 +5,12 @@ package base
 // Neurons "firing" state. The neuron should fire, if and only if, the synaptic inputs
 type Neuron struct {
 	// Internal Attributes
-	synapses map[Address]Synapse
+	synapses map[Address]*Synapse
 	axon     chan int
 }
 
 func NewNeuron() *Neuron {
-	synapses := make(map[Address]Synapse)
+	synapses := make(map[Address]*Synapse)
 	return &Neuron{synapses: synapses, axon: make(chan int)}
 }
 

@@ -5,23 +5,15 @@ package base
 // these many associative signals and, after performing a Winner Takes All operation on the aggregate signal, will
 // produce a DistributedSignal which, to the system, best represents the composite of associations.
 type Cluster struct {
-	binding      string            //The name of the system this cluster is a part of.
-	groups       map[string]*Group //The component groups of this cluster indexed by their linked association.
-	Destinations map[string]chan DistributedSignal
-	Main         chan DistributedSignal
-	PassThrough  bool
+	binding              string            //The name of the system this cluster is a part of.
+	groups               map[string]*Group //The component groups of this cluster indexed by their linked association.
+	PassThrough          bool
+	CorrelationThreshold int
 }
 
 func NewCluster(binding string) *Cluster {
 	c := Cluster{binding: binding, groups: make(map[string]*Group)}
-	c.Destinations = make(map[string]chan DistributedSignal)
 	return &c
-}
-
-func (c *Cluster) SetCorrelationThreshold(signal int) {
-	for _, group := range c.groups {
-		group.CorrelationThresholdSignal = signal
-	}
 }
 
 // Evoke will test the clusters groups for possible signals.
@@ -31,7 +23,7 @@ func (c *Cluster) Evoke(main DistributedSignal, associates map[string]Distribute
 	// Test each group for firing patterns. If no group exists to handle the associated signal, create one.
 	for binding, signal := range associates {
 		if group, ok := c.groups[binding]; ok {
-			go group.Evoke(main, signal, c.PassThrough)
+			go group.Evoke(main, signal, c.PassThrough, c.CorrelationThreshold)
 		} else {
 			newGroups[binding] = NewGroup(binding)
 		}
