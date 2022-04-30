@@ -4,7 +4,7 @@ package base
 type Group struct {
 	// Internal Attributes
 	binding string // The name of the system this neuron group is a part of.
-	neurons map[Feature]*Neuron
+	neurons map[Address]*Neuron
 	// Inbound Attributes
 	CorrelationThresholdSignal int
 	LearningControlSignal      int
@@ -13,7 +13,7 @@ type Group struct {
 }
 
 func NewGroup(binding string) *Group {
-	neurons := make(map[Feature]*Neuron)
+	neurons := make(map[Address]*Neuron)
 	ng := Group{neurons: neurons,
 		binding:               binding,
 		LearningControlSignal: 1,
@@ -24,7 +24,7 @@ func NewGroup(binding string) *Group {
 
 func (g *Group) Evoke(main DistributedSignal, association DistributedSignal, passThrough bool) {
 	firePattern := NewDistributedSignal(g.binding + ":group")
-	newNeurons := make(map[Feature]*Neuron)
+	newNeurons := make(map[Address]*Neuron)
 	// Pass the input pattern through to the output pattern if this group is set for pass-through
 	if passThrough {
 		firePattern.Features = main.Features

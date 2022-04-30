@@ -5,15 +5,15 @@ import (
 	"strings"
 )
 
-// A Feature is the identifying tag for a location of an object in the neural geometry. It is most importantly
+// An Address is the identifying tag for a location of an object in the neural geometry. It is most importantly
 // used in the mapping the firing patterns, but also has many other applications.
-type Feature struct {
+type Address struct {
 	X int // The x-position on the neural architectures coordinate plane
 	Y int // The y-position on the neural architectures coordinate plane
 }
 
-// Represent returns a helpful string representation of this Feature.
-func (a Feature) Represent() string {
+// Represent returns a helpful string representation of this Address.
+func (a Address) Represent() string {
 	return fmt.Sprint("@(", a.X, ",", a.Y, ")")
 }
 
@@ -30,19 +30,19 @@ type DistributedSignal struct {
 	name     string          // A descriptive name for this signal. Useful in debugging and logging.
 	Novelty  int             // The sum of all the novelty events in the production of this firing pattern.
 	MisMatch int             // The sum of all the mismatches in the production of this firing pattern.
-	Features map[Feature]int // The complete set of active features in the DistributedSignal.
+	Features map[Address]int // The complete set of active features in the DistributedSignal.
 }
 
 // NewDistributedSignal returns a new DistributedSignal initialized with no Features set. The DistributedSignal's size at this point is 0,
 // and it occupies very little space in the system. As Features are set more, more will populate the quale. Zero values
 // will never be set, as the 0 is assumed by the absence of a feature.
 func NewDistributedSignal(name string) DistributedSignal {
-	return DistributedSignal{name: name, Features: make(map[Feature]int)}
+	return DistributedSignal{name: name, Features: make(map[Address]int)}
 }
 
 // Composite will add all the features of B to the features of A. Where-ever there is overlap the features are summed.
 func (q *DistributedSignal) Composite(signal DistributedSignal) {
-	for addr, _ := range q.Features {
+	for addr := range q.Features {
 		if value, ok := signal.Features[addr]; ok {
 			q.Features[addr] += value
 		}
@@ -56,7 +56,7 @@ func (q *DistributedSignal) Count() int {
 
 // ShiftX will shift all Features along the x-axis by a specified step integer.
 func (q *DistributedSignal) ShiftX(step int) {
-	shifted := make(map[Feature]int, len(q.Features))
+	shifted := make(map[Address]int, len(q.Features))
 	i := 0
 	for addr, feature := range q.Features {
 		newAddr := addr
