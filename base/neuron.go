@@ -5,12 +5,12 @@ package base
 // Neurons "firing" state. The neuron should fire, if and only if, the synaptic inputs
 type Neuron struct {
 	// Internal Attributes
-	synapses map[Address]Synapse
+	synapses map[Feature]Synapse
 	axon     chan int
 }
 
 func NewNeuron() *Neuron {
-	synapses := make(map[Address]Synapse)
+	synapses := make(map[Feature]Synapse)
 	return &Neuron{synapses: synapses, axon: make(chan int)}
 }
 
@@ -28,7 +28,7 @@ func (n *Neuron) GetSumOfWeights() int {
 // Evoke tests the neuron for firing and writes the fired value to the 'axon' channel.
 func (n *Neuron) Evoke(main int, associative DistributedSignal, correlation int, learningControl int) {
 	sum := 0
-	for featureAddress, feature := range associative.GetFeatures() {
+	for featureAddress, feature := range associative.Features {
 		if syn, ok := n.synapses[featureAddress]; ok {
 			sum += syn.Evoke(main, feature, correlation, learningControl)
 		} else {

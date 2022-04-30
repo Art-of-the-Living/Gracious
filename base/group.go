@@ -4,19 +4,16 @@ package base
 type Group struct {
 	// Internal Attributes
 	binding string // The name of the system this neuron group is a part of.
-	neurons map[Address]*Neuron
+	neurons map[Feature]*Neuron
 	// Inbound Attributes
 	CorrelationThresholdSignal int
 	LearningControlSignal      int
-	PassThrough                bool
 	// Outbound Attributes
 	firingPattern chan DistributedSignal
-	Match         int
-	Novelty       int
 }
 
 func NewGroup(binding string) *Group {
-	neurons := make(map[Address]*Neuron)
+	neurons := make(map[Feature]*Neuron)
 	ng := Group{neurons: neurons,
 		binding:               binding,
 		LearningControlSignal: 1,
@@ -25,15 +22,15 @@ func NewGroup(binding string) *Group {
 	return &ng
 }
 
-func (g *Group) Evoke(main DistributedSignal, association DistributedSignal) {
-	firePattern := NewDistributedSignal()
-	newNeurons := make(map[Address]*Neuron)
+func (g *Group) Evoke(main DistributedSignal, association DistributedSignal, passThrough bool) {
+	firePattern := NewDistributedSignal(g.binding + ":group")
+	newNeurons := make(map[Feature]*Neuron)
 	// Pass the input pattern through to the output pattern if this group is set for pass-through
-	if g.PassThrough {
-		firePattern = main
+	if passThrough {
+		firePattern.Features = main.Features
 	}
 	// Test each neuron for firing strength. If no neuron exists to process the signal, make one.
-	for featureAddress, feature := range main.GetFeatures() {
+	for featureAddress, feature := range main.Features {
 		if neuron, ok := g.neurons[featureAddress]; ok {
 			go neuron.Evoke(feature, association, g.CorrelationThresholdSignal, g.LearningControlSignal)
 		} else {
@@ -43,7 +40,7 @@ func (g *Group) Evoke(main DistributedSignal, association DistributedSignal) {
 	// Retrieve the firing strength of each neuron and adjust the firing pattern accordingly
 	for address, neuron := range g.neurons {
 		sum := <-neuron.axon
-		firePattern.AdjustFeature(address, sum)
+		firePattern.Features[address] += sum
 	}
 	// Add the newly needed neurons to the set of neurons in the group
 	for newAddress, newNeuron := range newNeurons {
