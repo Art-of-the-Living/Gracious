@@ -11,8 +11,8 @@ type Synapse struct {
 
 // NewSynapse initializes a new Synapse with a -1 weight value and a 0 correlation sum. A pointer to the Synapse is
 // returned.
-func NewSynapse() Synapse {
-	syn := Synapse{weightValue: -1, correlationSum: 0}
+func NewSynapse() *Synapse {
+	syn := &Synapse{weightValue: -1, correlationSum: 0}
 	return syn
 }
 

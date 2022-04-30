@@ -1,61 +1,42 @@
 package base
 
-// Cluster is a set of Groups such that each Group processes a specific associative quale type, but all Groups receive
-// the same main quale type and quale. When evoked a cluster returns only the strongest quale. A cluster ensures that
-// quale are evoked associatively only by the proper quale type for the association.
+// Cluster is a set of Groups such that each Group processes a specific associative DistributedSignal which each
+// originates from a different part of the system. When evoked the Cluster aggregates the associational outputs of
+// these many associative signals and, after performing a Winner Takes All operation on the aggregate signal, will
+// produce a DistributedSignal which, to the system, best represents the composite of associations.
 type Cluster struct {
-	binding      string            //The name of the system this cluster is a part of.
-	groups       map[string]*Group //The component groups of this cluster indexed by their linked association.
-	Destinations map[string]chan Quale
-	Main         chan Quale
-	Active       bool
+	binding              string            //The name of the system this cluster is a part of.
+	groups               map[string]*Group //The component groups of this cluster indexed by their linked association.
+	PassThrough          bool
+	CorrelationThreshold int
 }
 
 func NewCluster(binding string) *Cluster {
 	c := Cluster{binding: binding, groups: make(map[string]*Group)}
-	c.Destinations = make(map[string]chan Quale)
 	return &c
 }
 
-func (c *Cluster) AddDestination(binding string, channel chan Quale) {
-	c.Destinations[binding] = channel
-}
-
-func (c *Cluster) AddNewGroup(binding string) *Group {
-	ng := NewGroup(c.binding)
-	c.groups[binding] = ng
-	return ng
-}
-
-func (c *Cluster) SetPassThrough(pass bool) {
-	for _, group := range c.groups {
-		group.PassThrough = pass
-	}
-}
-
-func (c *Cluster) SetCorrelationThreshold(signal int) {
-	for _, group := range c.groups {
-		group.CorrelationThresholdSignal = signal
-	}
-}
-
-func (c *Cluster) Evoke() {
-	strongestQuale := NewQuale()
-	main := <-c.Main
-	out := make(map[string]chan Quale, len(c.groups))
-	for binding, group := range c.groups {
-		out[binding] = make(chan Quale)
-		go group.Evoke(main, out[binding])
-	}
-	for binding, _ := range c.groups {
-		out := <-out[binding]
-		if out.Strength() > strongestQuale.Strength() {
-			strongestQuale = out
+// Evoke will test the clusters groups for possible signals.
+func (c *Cluster) Evoke(main DistributedSignal, associates map[string]DistributedSignal) DistributedSignal {
+	newDistributedSignal := NewDistributedSignal(c.binding + ":evocation")
+	newGroups := make(map[string]*Group)
+	// Test each group for firing patterns. If no group exists to handle the associated signal, create one.
+	for binding, signal := range associates {
+		if group, ok := c.groups[binding]; ok {
+			go group.Evoke(main, signal, c.PassThrough, c.CorrelationThreshold)
+		} else {
+			newGroups[binding] = NewGroup(binding)
 		}
 	}
-	for _, destination := range c.Destinations {
-		select {
-		case destination <- strongestQuale:
-		}
+	// Receive the firing patterns of each group and
+	for _, group := range c.groups {
+		testPattern := <-group.firingPattern
+		newDistributedSignal.Composite(testPattern)
 	}
+	// Add any newly created groups to the cluster groups
+	for newBinding, newGroup := range newGroups {
+		c.groups[newBinding] = newGroup
+	}
+	newDistributedSignal.WinnersTakeAll(0)
+	return newDistributedSignal
 }
