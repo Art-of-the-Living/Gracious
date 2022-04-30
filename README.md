@@ -1,14 +1,18 @@
 # <img src="icon.webp" width="32"> On Gracious
 
-> The mind is not a computer, but it can be simulated on one.
+> The mind is information and all information can be simulated. Gracious operates on the premise that, A ⊙ M = MO.
+> (i.e. An associational signal can evoke the properties of M in MO without M's presence). Given that A and M are both
+> distributed signal representations, a form of data representation which retains and communicates both meaning and
+> state, then a system built on these parameters is a conscious system. And Gracious is for building conscious systems.
 
-## A Cognitive Simulation Framework
+## A Collection of Cognitive Operations
 
-Gracious is a simulation framework for the cognitive systems which give rise to consciousness. While these systems are
-inspired by their biological implementations in the human brain, this is not meant to be neuro-biological simulation.
-Furthermore, while the behaviour of these systems may exhibit properties of a "learning machine" this is not a machine
-learning framework. There is no back-propagation or gradient descent. Instead, Gracious rests, fundamentally, on
-the processing of associative operations between distributed signal representations. 
+Gracious is a collection of operators for the construction of the cognitive systems which give rise to consciousness.
+While these systems are inspired by their biological implementations in the human brain, this is not meant to be
+neuro-biological simulation.  Furthermore, while the behaviour of these systems may exhibit properties of a
+"learning machine" this is not a machine learning framework. There is no back-propagation or gradient descent.
+Instead, Gracious rests, fundamentally, on the processing of associative operations between distributed signal
+representations.
 
 ## The Theory
 
@@ -23,8 +27,4 @@ simulations.
 
 ## Getting Started
 
-Gracious provides sample architectures to demonstrate program functionality. These sample architectures are distributed
-as releases and are available [here](https://github.com/KennethGrace/Gracious/releases). A summary of the architectures'
-operation is available in the [docs](docs) under [samples](docs/samples). It is recommended that new users begin with
-the `Phenomenal Ternary Associative Architecture` (or PTA Architecture). The PTA Architecture demonstrates the principles of qualar associations without any
-lasting memory. As no memory architectures are not provided in the current version of Gracious.
+Gracious is not a 
