@@ -22,27 +22,24 @@ func NewGroup(binding string) *Group {
 
 func (g *Group) Evoke(main DistributedSignal, association DistributedSignal, passThrough bool, cts int) {
 	firePattern := NewDistributedSignal(g.binding + ":group")
-	newNeurons := make(map[Address]*Neuron)
 	// Pass the input pattern through to the output pattern if this group is set for pass-through
 	if passThrough {
 		firePattern.Composite(main)
 	}
-	// Test each neuron for firing strength. If no neuron exists to process the signal, make one.
-	for featureAddress, feature := range main.Features {
-		if neuron, ok := g.neurons[featureAddress]; ok {
-			go neuron.Evoke(feature, association, cts, g.LearningControlSignal)
-		} else {
-			newNeurons[featureAddress] = NewNeuron()
+	// Test the incoming signal for building new neurons
+	for addr := range main.Features {
+		if _, ok := g.neurons[addr]; !ok {
+			g.neurons[addr] = NewNeuron()
 		}
+	}
+	// Test each neuron for firing strength.
+	for addr, neuron := range g.neurons {
+		go neuron.Evoke(main.Features[addr], association, cts, g.LearningControlSignal)
 	}
 	// Retrieve the firing strength of each neuron and adjust the firing pattern accordingly
 	for address, neuron := range g.neurons {
 		sum := <-neuron.axon
 		firePattern.Features[address] += sum
-	}
-	// Add the newly needed neurons to the set of neurons in the group
-	for newAddress, newNeuron := range newNeurons {
-		g.neurons[newAddress] = newNeuron
 	}
 	firePattern.WinnersTakeAll(0)
 	g.firingPattern <- firePattern

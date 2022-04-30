@@ -19,23 +19,20 @@ func NewCluster(binding string) *Cluster {
 // Evoke will test the clusters groups for possible signals.
 func (c *Cluster) Evoke(main DistributedSignal, associates map[string]DistributedSignal) DistributedSignal {
 	newDistributedSignal := NewDistributedSignal(c.binding + ":evocation")
-	newGroups := make(map[string]*Group)
-	// Test each group for firing patterns. If no group exists to handle the associated signal, create one.
-	for binding, signal := range associates {
-		if group, ok := c.groups[binding]; ok {
-			go group.Evoke(main, signal, c.PassThrough, c.CorrelationThreshold)
-		} else {
-			newGroups[binding] = NewGroup(binding)
+	// Test the incoming signal for building new neuron groups
+	for binding := range associates {
+		if _, ok := c.groups[binding]; !ok {
+			c.groups[binding] = NewGroup(binding)
 		}
+	}
+	// Test each group for firing pattern.
+	for binding, group := range c.groups {
+		go group.Evoke(main, associates[binding], c.PassThrough, c.CorrelationThreshold)
 	}
 	// Receive the firing patterns of each group and
 	for _, group := range c.groups {
 		testPattern := <-group.firingPattern
 		newDistributedSignal.Composite(testPattern)
-	}
-	// Add any newly created groups to the cluster groups
-	for newBinding, newGroup := range newGroups {
-		c.groups[newBinding] = newGroup
 	}
 	newDistributedSignal.WinnersTakeAll(0)
 	return newDistributedSignal

@@ -71,7 +71,7 @@ func (q *DistributedSignal) ShiftX(step int) {
 
 // WinnersTakeAll forces the Features in the DistributedSignal to fight for dominance and only the strongest features
 // will remain present in the signal. The gap parameter permits a level of tolerance for features which almost meet
-// with max threshold.
+// with max threshold. No signal beneath 1 will ever be passed through.
 func (q *DistributedSignal) WinnersTakeAll(gap int) {
 	max := 1
 	for _, feature := range q.Features {
