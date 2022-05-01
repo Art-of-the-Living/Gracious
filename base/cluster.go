@@ -11,6 +11,7 @@ type Cluster struct {
 	CorrelationThreshold int
 }
 
+// NewCluster returns a new Cluster
 func NewCluster(binding string) *Cluster {
 	c := Cluster{binding: binding, groups: make(map[string]*Group)}
 	return &c
@@ -34,6 +35,5 @@ func (c *Cluster) Evoke(main DistributedSignal, associates map[string]Distribute
 		testPattern := <-group.firingPattern
 		newDistributedSignal.Composite(testPattern)
 	}
-	newDistributedSignal.WinnersTakeAll(0)
 	return newDistributedSignal
 }
