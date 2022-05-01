@@ -19,8 +19,7 @@ Associative Neuron and the Haikonen Cognitive Architecture which Gracious struct
 modifications have been made to Dr. Haikonen's designs. Dynamic neuron groups and an optimized 3:1 Hebbian learning have
 been added in the name of improved computational efficiency. These modifications have maintained there efficacy and are
 comparable in output. Other modifications, including simulated architecture and bipolar associations have been
-added to improve on Dr. Haikonen's original designs. Descriptions of all the Gracious terms and their implications are
-available in the [docs](docs) under [theory](docs/theory). These concepts are not critical to the high-level operation
+added to improve on Dr. Haikonen's original designs. These concepts are not critical to the high-level operation
 of Gracious simulations. 
 
 However, unlike Dr. Haikonen, the **Art of the Living** believes minds simulated on a computer are both possible and
