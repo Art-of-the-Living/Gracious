@@ -30,7 +30,11 @@ func (n *Neuron) Evoke(main int, associative DistributedSignal, correlation int,
 	sum := 0
 	for featureAddress, feature := range associative.Features {
 		if syn, ok := n.synapses[featureAddress]; ok {
-			sum += syn.Evoke(main, feature, correlation, learningControl)
+			value := syn.Evoke(feature)
+			sum += value
+			if value < main {
+				syn.Train(main, feature, correlation)
+			}
 		} else {
 			n.synapses[featureAddress] = NewSynapse()
 		}

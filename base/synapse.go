@@ -16,19 +16,21 @@ func NewSynapse() *Synapse {
 	return syn
 }
 
-//Evoke is invoked at time, T, to train the synapse on the training and feature signals and return the result of
-//the associational operation between the feature signal and the synaptic weight. For learning we use an optimized
-//correlative Hebbian learning algorithm for training, which prioritizes bit-shifting for multiplications and
-//performs +3:-1 incremental steps.
-func (syn *Synapse) Evoke(training int, association int, correlation int, learningControl int) int {
-	if learningControl > 0 {
-		if syn.correlationSum > correlation {
-			syn.weightValue = 1
-		} else {
-			syn.weightValue = -1
-			syn.correlationSum += 4 * association * training
-			syn.correlationSum -= association
-		}
-	}
+// Evoke is invoked at time, T, to return the result of the associational
+// operation between the feature signal and the synaptic weight.
+func (syn *Synapse) Evoke(association int) int {
 	return association * syn.weightValue
+}
+
+// Train trains the synapse for later evocation. For learning we use an optimized
+// correlative Hebbian learning algorithm for training, which prioritizes
+// bit-shifting for multiplications and performs +3:-1 incremental steps.
+func (syn *Synapse) Train(training int, association int, correlation int) {
+	if syn.correlationSum > correlation {
+		syn.weightValue = 1
+	} else {
+		syn.weightValue = -1
+		syn.correlationSum += 4 * association * training
+		syn.correlationSum -= association
+	}
 }

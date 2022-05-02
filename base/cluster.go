@@ -17,6 +17,10 @@ func NewCluster(binding string) *Cluster {
 	return &c
 }
 
+func (c *Cluster) GetName() string {
+	return c.binding
+}
+
 // Evoke will test the clusters groups for possible signals.
 func (c *Cluster) Evoke(main DistributedSignal, associates map[string]DistributedSignal) DistributedSignal {
 	newDistributedSignal := NewDistributedSignal(c.binding + ":evocation")
