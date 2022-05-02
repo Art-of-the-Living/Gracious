@@ -9,8 +9,8 @@ import "github.com/Art-of-the-Living/gracious/base"
 type Evaluator struct {
 	name       string
 	cluster    *base.Cluster
-	Main       base.DistributedSignal            // The main signal that this cluster is "observing"
-	Associates map[string]base.DistributedSignal // The associative signals that compete with "observations"
+	Main       base.DistributedSignal // The main signal that this cluster is "observing"
+	Associates *base.Connections      // The associative signals that compete with "observations"
 }
 
 // NewEvaluator creates a new Evaluator

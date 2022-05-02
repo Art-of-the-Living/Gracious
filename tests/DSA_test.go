@@ -30,7 +30,7 @@ func TestDSABasic(t *testing.T) {
 	json.Unmarshal(bytes, &wordSignalData)
 	sensorA := components.NewSensor("Color")
 	sensorB := components.NewSensor("Word")
-	displayCount := 32
+	displayCount := 64
 	aSteps := 0
 	aPos := 0
 	sensorA.SetProcessor(func() base.DistributedSignal {
@@ -59,38 +59,40 @@ func TestDSABasic(t *testing.T) {
 		}
 		return tmp
 	})
-	evaluatorA := components.NewEvaluator("Color")
-	evaluatorB := components.NewEvaluator("Word")
+	colorEvaluator := components.NewEvaluator("Color")
+	wordEvaluator := components.NewEvaluator("Word")
 
-	associatorA := components.NewAssociator("Color")
-	associatorB := components.NewAssociator("Word")
+	colorAssc := components.NewAssociator("Color")
+	wordAssc := components.NewAssociator("Word")
 
-	PsiASet := make(map[string]base.DistributedSignal)
-	PsiBSet := make(map[string]base.DistributedSignal)
-	XiASet := make(map[string]base.DistributedSignal)
-	XiBSet := make(map[string]base.DistributedSignal)
-	count := 256
+	PsiNetwork := base.NewNetwork("Psi")
+	XiNetwork := base.NewNetwork("Xi")
+	count := 512
 	for i := 0; i < count; i++ {
 		fmt.Println("\tTHE CURRENT OBSERVATION IS", i, "OF", count)
 		NuA := sensorA.Evoke()
 		NuB := sensorB.Evoke()
 		fmt.Println(NuA.Represent())
 		fmt.Println(NuB.Represent())
-		evaluatorA.Main = NuA
-		evaluatorA.Associates = XiASet
-		evaluatorB.Main = NuB
-		evaluatorB.Associates = XiBSet
-		PsiBSet["A"] = evaluatorA.Evoke()
-		PsiASet["B"] = evaluatorB.Evoke()
-		associatorA.Main = PsiBSet["A"]
-		associatorB.Main = PsiASet["B"]
-		associatorA.Associates = PsiASet
-		associatorB.Associates = PsiBSet
-		XiASet["A"] = associatorA.Evoke()
-		XiBSet["B"] = associatorB.Evoke()
-		tmp := XiASet["A"]
-		fmt.Println(tmp.Represent())
-		tmp = XiBSet["B"]
-		fmt.Println(tmp.Represent())
+		colorEvaluator.Main = NuA
+		colorEvaluator.Associates = XiNetwork.GetConnections("Color")
+		wordEvaluator.Main = NuB
+		wordEvaluator.Associates = XiNetwork.GetConnections("Word")
+		PsiColor := colorEvaluator.Evoke()
+		PsiWord := wordEvaluator.Evoke()
+		fmt.Println(PsiColor.Represent())
+		fmt.Println(PsiWord.Represent())
+		PsiNetwork.AddSignals("Color", PsiWord)
+		PsiNetwork.AddSignals("Word", PsiColor)
+		colorAssc.Main = PsiColor
+		wordAssc.Main = PsiWord
+		colorAssc.Associates = PsiNetwork.GetConnections("Color")
+		wordAssc.Associates = PsiNetwork.GetConnections("Word")
+		XiColor := colorAssc.Evoke()
+		XiWord := wordAssc.Evoke()
+		XiNetwork.AddSignals("Color", XiColor)
+		XiNetwork.AddSignals("Word", XiWord)
+		fmt.Println(XiColor.Represent())
+		fmt.Println(XiWord.Represent())
 	}
 }

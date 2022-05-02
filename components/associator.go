@@ -11,8 +11,8 @@ type Associator struct {
 	name               string
 	associativeCluster *base.Cluster
 	memoryCluster      *base.Cluster
-	Main               base.DistributedSignal            // The main signal that this associator "recalls"
-	Associates         map[string]base.DistributedSignal // The associative signals that recall the main signal
+	Main               base.DistributedSignal // The main signal that this associator "recalls"
+	Associates         *base.Connections      // The associative signals that recall the main signal
 }
 
 // NewAssociator creates a new Associator
