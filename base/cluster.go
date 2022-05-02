@@ -22,17 +22,17 @@ func (c *Cluster) GetName() string {
 }
 
 // Evoke will test the clusters groups for possible signals.
-func (c *Cluster) Evoke(main DistributedSignal, associates map[string]DistributedSignal) DistributedSignal {
+func (c *Cluster) Evoke(main DistributedSignal, associates *Connections) DistributedSignal {
 	newDistributedSignal := NewDistributedSignal(c.binding + ":evocation")
 	// Test the incoming signal for building new neuron groups
-	for binding := range associates {
-		if _, ok := c.groups[binding]; !ok {
-			c.groups[binding] = NewGroup(binding)
+	for id := range associates.Signals {
+		if _, ok := c.groups[id]; !ok {
+			c.groups[id] = NewGroup(id)
 		}
 	}
 	// Test each group for firing pattern.
-	for binding, group := range c.groups {
-		go group.Evoke(main, associates[binding], c.PassThrough, c.CorrelationThreshold)
+	for id, group := range c.groups {
+		go group.Evoke(main, associates.Signals[id], c.PassThrough, c.CorrelationThreshold)
 	}
 	// Receive the firing patterns of each group and
 	for _, group := range c.groups {
