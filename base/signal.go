@@ -83,8 +83,8 @@ func (q *DistributedSignal) WinnersTakeAll(gap int) {
 		if feature < (max - gap) {
 			delete(q.Features, addr)
 		} else {
-			if feature > 3 {
-				q.Features[addr] = feature - 1
+			if feature >= 4 {
+				q.Features[addr] = feature / 2
 			}
 		}
 	}

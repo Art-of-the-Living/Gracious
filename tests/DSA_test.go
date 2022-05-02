@@ -28,23 +28,34 @@ func TestDSABasic(t *testing.T) {
 	json.Unmarshal(bytes, &colorSignalData)
 	bytes, _ = ioutil.ReadAll(wordDataFile)
 	json.Unmarshal(bytes, &wordSignalData)
-	sensorA := components.NewSensor("A")
-	sensorB := components.NewSensor("B")
+	sensorA := components.NewSensor("Color")
+	sensorB := components.NewSensor("Word")
+	displayCount := 16
 	aSteps := 0
+	aPos := 0
 	sensorA.SetProcessor(func() base.DistributedSignal {
-		tmp := colorSignalData.Signals[aSteps].ToDistributedSignal()
+		tmp := colorSignalData.Signals[aPos].ToDistributedSignal()
 		aSteps++
-		if aSteps >= len(colorSignalData.Signals) {
+		if aSteps >= displayCount {
+			aPos++
 			aSteps = 0
+			if aPos >= len(colorSignalData.Signals) {
+				aPos = 0
+			}
 		}
 		return tmp
 	})
 	bSteps := 0
+	bPos := 0
 	sensorB.SetProcessor(func() base.DistributedSignal {
-		tmp := wordSignalData.Signals[bSteps].ToDistributedSignal()
+		tmp := wordSignalData.Signals[bPos].ToDistributedSignal()
 		bSteps++
-		if bSteps >= len(wordSignalData.Signals) {
+		if bSteps >= displayCount {
+			bPos++
 			bSteps = 0
+			if bPos >= len(wordSignalData.Signals) {
+				bPos = 0
+			}
 		}
 		return tmp
 	})
