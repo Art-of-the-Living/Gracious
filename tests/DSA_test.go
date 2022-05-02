@@ -12,6 +12,7 @@ import (
 )
 
 func TestDSABasic(t *testing.T) {
+	// Reading the Test Data Files
 	colorDataFile, err := os.Open("data/colorA.json")
 	if err != nil {
 		fmt.Println(err)
@@ -28,9 +29,11 @@ func TestDSABasic(t *testing.T) {
 	json.Unmarshal(bytes, &colorSignalData)
 	bytes, _ = ioutil.ReadAll(wordDataFile)
 	json.Unmarshal(bytes, &wordSignalData)
+
+	// SetUp Neural Components
 	sensorA := components.NewSensor("Color")
 	sensorB := components.NewSensor("Word")
-	displayCount := 64
+	displayCount := 8
 	aSteps := 0
 	aPos := 0
 	sensorA.SetProcessor(func() base.DistributedSignal {
@@ -67,7 +70,7 @@ func TestDSABasic(t *testing.T) {
 
 	PsiNetwork := base.NewNetwork("Psi")
 	XiNetwork := base.NewNetwork("Xi")
-	count := 512
+	count := 64
 	for i := 0; i < count; i++ {
 		fmt.Println("\tTHE CURRENT OBSERVATION IS", i, "OF", count)
 		NuA := sensorA.Evoke()
