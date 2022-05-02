@@ -30,7 +30,7 @@ func TestDSABasic(t *testing.T) {
 	json.Unmarshal(bytes, &wordSignalData)
 	sensorA := components.NewSensor("Color")
 	sensorB := components.NewSensor("Word")
-	displayCount := 16
+	displayCount := 32
 	aSteps := 0
 	aPos := 0
 	sensorA.SetProcessor(func() base.DistributedSignal {
@@ -69,9 +69,9 @@ func TestDSABasic(t *testing.T) {
 	PsiBSet := make(map[string]base.DistributedSignal)
 	XiASet := make(map[string]base.DistributedSignal)
 	XiBSet := make(map[string]base.DistributedSignal)
-	count := 128
+	count := 256
 	for i := 0; i < count; i++ {
-		fmt.Println("THE CURRENT OBSERVATION IS", i, "OF", count)
+		fmt.Println("\tTHE CURRENT OBSERVATION IS", i, "OF", count)
 		NuA := sensorA.Evoke()
 		NuB := sensorB.Evoke()
 		fmt.Println(NuA.Represent())

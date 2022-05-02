@@ -32,10 +32,7 @@ func (a *Associator) GetName() string {
 
 // Evoke returns the evocation of the Associator neuron clusters given the Main and Associates DistributedSignal.
 func (a *Associator) Evoke() base.DistributedSignal {
-	partial := a.associativeCluster.Evoke(a.Main, a.Associates)
-	tmp := make(map[string]base.DistributedSignal)
-	tmp[a.memoryCluster.GetName()+":cluster"] = partial
-	full := a.memoryCluster.Evoke(partial, tmp)
-	full.WinnersTakeAll(0)
-	return full
+	evocation := a.associativeCluster.Evoke(a.Main, a.Associates)
+	evocation.WinnersTakeAll(0)
+	return evocation
 }
