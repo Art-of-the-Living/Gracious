@@ -1,27 +1,30 @@
 package base
 
-// Group is a set of neurons with a specific associative quale type input and a specific main quale type input and output.
+// Group is a set of neurons with a specific associative DistributedSignal type input and a specific main
+// DistributedSignal type input and output.
 type Group struct {
+	Id string // The name of the system this neuron group is a part of.
 	// Internal Attributes
-	binding               string // The name of the system this neuron group is a part of.
-	neurons               map[Address]*Neuron
-	LearningControlSignal int
+	neurons map[Address]*Neuron
 	// Outbound Attributes
-	firingPattern chan DistributedSignal
+	pattern chan DistributedSignal
 }
 
-func NewGroup(binding string) *Group {
+func NewGroup(id string) *Group {
 	neurons := make(map[Address]*Neuron)
 	ng := Group{neurons: neurons,
-		binding:               binding,
-		LearningControlSignal: 1,
-		firingPattern:         make(chan DistributedSignal),
+		Id:      id,
+		pattern: make(chan DistributedSignal),
 	}
 	return &ng
 }
 
+func (g *Group) GetFiringPattern() DistributedSignal {
+	return <-g.pattern
+}
+
 func (g *Group) Evoke(main DistributedSignal, association DistributedSignal, passThrough bool, cts int) {
-	firePattern := NewDistributedSignal(g.binding + ":group")
+	firePattern := NewDistributedSignal(g.Id + ":group")
 	// Pass the input pattern through to the output pattern if this group is set for pass-through
 	if passThrough {
 		firePattern.Composite(main)
@@ -34,7 +37,7 @@ func (g *Group) Evoke(main DistributedSignal, association DistributedSignal, pas
 	}
 	// Test each neuron for firing strength.
 	for addr, neuron := range g.neurons {
-		go neuron.Evoke(main.Features[addr], association, cts, g.LearningControlSignal)
+		go neuron.Evoke(main.Features[addr], association, cts)
 	}
 	// Retrieve the firing strength of each neuron and adjust the firing pattern accordingly
 	for address, neuron := range g.neurons {
@@ -42,5 +45,5 @@ func (g *Group) Evoke(main DistributedSignal, association DistributedSignal, pas
 		firePattern.Features[address] += sum
 	}
 	firePattern.WinnersTakeAll(0)
-	g.firingPattern <- firePattern
+	g.pattern <- firePattern
 }

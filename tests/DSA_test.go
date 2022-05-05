@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Art-of-the-Living/gracious/base"
 	"github.com/Art-of-the-Living/gracious/components"
+	"github.com/Art-of-the-Living/gracious/objects"
 	"github.com/Art-of-the-Living/gracious/tests/util"
 	"io/ioutil"
 	"os"
@@ -68,8 +69,8 @@ func TestDSABasic(t *testing.T) {
 	colorAssc := components.NewAssociator("Color")
 	wordAssc := components.NewAssociator("Word")
 
-	PsiNetwork := base.NewNetwork("Psi")
-	XiNetwork := base.NewNetwork("Xi")
+	PsiNetwork := objects.NewNetwork("Psi")
+	XiNetwork := objects.NewNetwork("Xi")
 	count := 64
 	for i := 0; i < count; i++ {
 		fmt.Println("\tTHE CURRENT OBSERVATION IS", i, "OF", count)
@@ -78,9 +79,9 @@ func TestDSABasic(t *testing.T) {
 		fmt.Println(NuA.Represent())
 		fmt.Println(NuB.Represent())
 		colorEvaluator.Main = NuA
-		colorEvaluator.Associates = XiNetwork.GetConnections("Color")
+		colorEvaluator.Associates = XiNetwork.GetSubNet("Color")
 		wordEvaluator.Main = NuB
-		wordEvaluator.Associates = XiNetwork.GetConnections("Word")
+		wordEvaluator.Associates = XiNetwork.GetSubNet("Word")
 		PsiColor := colorEvaluator.Evoke()
 		PsiWord := wordEvaluator.Evoke()
 		fmt.Println(PsiColor.Represent())
@@ -89,8 +90,8 @@ func TestDSABasic(t *testing.T) {
 		PsiNetwork.AddSignals("Word", PsiColor)
 		colorAssc.Main = PsiColor
 		wordAssc.Main = PsiWord
-		colorAssc.Associates = PsiNetwork.GetConnections("Color")
-		wordAssc.Associates = PsiNetwork.GetConnections("Word")
+		colorAssc.Associates = PsiNetwork.GetSubNet("Color")
+		wordAssc.Associates = PsiNetwork.GetSubNet("Word")
 		XiColor := colorAssc.Evoke()
 		XiWord := wordAssc.Evoke()
 		XiNetwork.AddSignals("Color", XiColor)

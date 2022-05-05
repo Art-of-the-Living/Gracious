@@ -1,6 +1,9 @@
 package components
 
-import "github.com/Art-of-the-Living/gracious/base"
+import (
+	"github.com/Art-of-the-Living/gracious/base"
+	"github.com/Art-of-the-Living/gracious/objects"
+)
 
 // An Associator produces Xi (Ξ), the subconscious evaluation of all perceptual phenomena. An Associator
 // associates subjective percepts, Psi (𝚿), with one another and allows each percent to be recalled by
@@ -9,19 +12,16 @@ import "github.com/Art-of-the-Living/gracious/base"
 // traditional associations.
 type Associator struct {
 	name               string
-	associativeCluster *base.Cluster
-	memoryCluster      *base.Cluster
+	associativeCluster *objects.Cluster
 	Main               base.DistributedSignal // The main signal that this associator "recalls"
-	Associates         *base.Connections      // The associative signals that recall the main signal
+	Associates         *objects.SubNet        // The associative signals that recall the main signal
 }
 
 // NewAssociator creates a new Associator
 func NewAssociator(name string) *Associator {
 	associator := Associator{name: "Associator:" + name}
-	associator.associativeCluster = base.NewCluster(associator.name + ":associative")
+	associator.associativeCluster = objects.NewCluster(associator.name + ":associative")
 	associator.associativeCluster.CorrelationThreshold = 4
-	associator.memoryCluster = base.NewCluster(associator.name + ":memorial")
-	associator.memoryCluster.CorrelationThreshold = 3
 	return &associator
 }
 

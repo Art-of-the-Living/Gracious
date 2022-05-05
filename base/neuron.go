@@ -28,7 +28,7 @@ func (n *Neuron) GetSumOfWeights() int {
 // Evoke tests the neuron for firing and writes the fired value to the 'axon'
 // channel. If the firing state does not evoke in the presence of the training
 // signal, the synaptic association trains itself.
-func (n *Neuron) Evoke(training int, associative DistributedSignal, correlation int, learningControl int) {
+func (n *Neuron) Evoke(training int, associative DistributedSignal, correlation int) {
 	sum := 0
 	// Test the neuron synaptic associative evocations
 	for featureAddress, feature := range associative.Features {

@@ -27,7 +27,7 @@ func (a Address) Represent() string {
 // at that point. If we say that we can determine, in a given contact point, 3 distinct color values, then a distributed
 // signal of size 3. In this situation the signal could be in any of 2^n, 8, states.
 type DistributedSignal struct {
-	Name     string          // A descriptive name for this signal. Useful in debugging and logging.
+	Id       string          // A descriptive name for this signal. Useful in identification of this signal.
 	Novelty  int             // The sum of all the novelty events in the production of this firing pattern.
 	MisMatch int             // The sum of all the mismatches in the production of this firing pattern.
 	Features map[Address]int // The complete set of active features in the DistributedSignal.
@@ -37,7 +37,7 @@ type DistributedSignal struct {
 // and it occupies very little space in the system. As Features are set more, more will populate the quale. Zero values
 // will never be set, as the 0 is assumed by the absence of a feature.
 func NewDistributedSignal(name string) DistributedSignal {
-	return DistributedSignal{Name: name, Features: make(map[Address]int)}
+	return DistributedSignal{Id: name, Features: make(map[Address]int)}
 }
 
 // Composite will add all the features of B to the features of A. Where-ever there is overlap the features are summed.
@@ -111,8 +111,8 @@ func (q *DistributedSignal) Represent() string {
 		featureRepresentations = append(featureRepresentations, fmt.Sprint("<", feature, ">", address.Represent()))
 	}
 	if len(featureRepresentations) > 0 {
-		return q.Name + "; " + strings.Join(featureRepresentations, ", ")
+		return q.Id + "; " + strings.Join(featureRepresentations, ", ")
 	} else {
-		return q.Name + "; NO ACTIVITY"
+		return q.Id + "; NO ACTIVITY"
 	}
 }
