@@ -3,32 +3,26 @@ package base
 // Group is a set of neurons with a specific associative DistributedSignal type input and a specific main
 // DistributedSignal type input and output.
 type Group struct {
-	Id string // The name of the system this neuron group is a part of.
-	// Internal Attributes
-	neurons map[Address]*Neuron
-	// Outbound Attributes
-	pattern chan DistributedSignal
+	Id      string                 // The name of the system this neuron group is a part of.
+	neurons map[Address]*Neuron    // The Neurons which compose this Group
+	Pattern chan DistributedSignal // The active firing Pattern of this Group
 }
 
+// NewGroup returns a new Group instance with an empty map of Neuron instances
 func NewGroup(id string) *Group {
 	neurons := make(map[Address]*Neuron)
 	ng := Group{neurons: neurons,
-		Id:      id,
-		pattern: make(chan DistributedSignal),
+		Id:      id + "-G",
+		Pattern: make(chan DistributedSignal),
 	}
 	return &ng
 }
 
-func (g *Group) GetFiringPattern() DistributedSignal {
-	return <-g.pattern
-}
-
-func (g *Group) Evoke(main DistributedSignal, association DistributedSignal, passThrough bool, cts int) {
-	firePattern := NewDistributedSignal(g.Id + ":group")
-	// Pass the input pattern through to the output pattern if this group is set for pass-through
-	if passThrough {
-		firePattern.Composite(main)
-	}
+// Evoke will test the neuron group for associational evocation and learning on a main signal.
+// Once Evoked, the firing Pattern of the neuron group can be retrieved from GetFiringPattern.
+// Evoke should only be called using `go Evoke` as Evoke will hang writing to the NeuronGroups
+// Pattern.
+func (g *Group) Evoke(main DistributedSignal, association DistributedSignal, cts int) {
 	// Test the incoming signal for building new neurons
 	for addr := range main.Features {
 		if _, ok := g.neurons[addr]; !ok {
@@ -39,11 +33,10 @@ func (g *Group) Evoke(main DistributedSignal, association DistributedSignal, pas
 	for addr, neuron := range g.neurons {
 		go neuron.Evoke(main.Features[addr], association, cts)
 	}
-	// Retrieve the firing strength of each neuron and adjust the firing pattern accordingly
+	// Retrieve the firing strength of each neuron and adjust the firing Pattern accordingly
 	for address, neuron := range g.neurons {
 		sum := <-neuron.axon
-		firePattern.Features[address] += sum
+		main.Features[address] += sum
 	}
-	firePattern.WinnersTakeAll(0)
-	g.pattern <- firePattern
+	g.Pattern <- main
 }

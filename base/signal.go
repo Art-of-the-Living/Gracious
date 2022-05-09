@@ -23,13 +23,13 @@ func (a Address) Represent() string {
 // evocation of distributed signals with one another.
 //
 // A helpful example of a distributed signal is the phenomena of sight. Each sensory neuron for a given point on the
-// contact surface is tuned to a different frequency of light. A distributed signal would be the exact firing pattern
+// contact surface is tuned to a different frequency of light. A distributed signal would be the exact firing Pattern
 // at that point. If we say that we can determine, in a given contact point, 3 distinct color values, then a distributed
 // signal of size 3. In this situation the signal could be in any of 2^n, 8, states.
 type DistributedSignal struct {
 	Id       string          // A descriptive name for this signal. Useful in identification of this signal.
-	Novelty  int             // The sum of all the novelty events in the production of this firing pattern.
-	MisMatch int             // The sum of all the mismatches in the production of this firing pattern.
+	Novelty  int             // The sum of all the novelty events in the production of this firing Pattern.
+	MisMatch int             // The sum of all the mismatches in the production of this firing Pattern.
 	Features map[Address]int // The complete set of active features in the DistributedSignal.
 }
 
@@ -37,7 +37,7 @@ type DistributedSignal struct {
 // and it occupies very little space in the system. As Features are set more, more will populate the quale. Zero values
 // will never be set, as the 0 is assumed by the absence of a feature.
 func NewDistributedSignal(name string) DistributedSignal {
-	return DistributedSignal{Id: name, Features: make(map[Address]int)}
+	return DistributedSignal{Id: name + "-Sig", Features: make(map[Address]int)}
 }
 
 // Composite will add all the features of B to the features of A. Where-ever there is overlap the features are summed.
@@ -92,7 +92,7 @@ func (q *DistributedSignal) WinnersTakeAll(gap int) {
 
 // Decay will reduce the strength of every signal in the DistributedSignal by the parameter, factor. The signal level
 // will continue to drop until it reaches 1. The signal level can not drop below 1, otherwise the meaning of the
-// signal pattern would be lost.
+// signal Pattern would be lost.
 func (q *DistributedSignal) Decay(factor int) {
 	for address, feature := range q.Features {
 		if feature > 1 {

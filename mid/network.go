@@ -1,4 +1,4 @@
-package objects
+package mid
 
 import "github.com/Art-of-the-Living/gracious/base"
 
