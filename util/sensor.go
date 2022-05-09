@@ -11,7 +11,7 @@ type Sensor interface {
 // A FunctionalSensor produces phenomenal experience as direct sensory
 // observations. A FunctionalSensor component processes incoming raw-data into
 // distributed signals that the system can begin to work with. Unlike other
-// components a FunctionalSensor component doesn't have any DistributedSignal
+// evocation a FunctionalSensor component doesn't have any DistributedSignal
 // inputs, instead Sensors produces a DistributedSignal based on the output of an
 // externally implemented function. This function can be set using SetProcessor
 // and should be set before any calls to Evoke. Otherwise, Evoke will return an
