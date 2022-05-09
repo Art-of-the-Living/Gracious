@@ -54,7 +54,7 @@ func TestBasic(t *testing.T) {
 	fmt.Println("### TESTING TRAINING ###")
 	for _, signal := range colorSignalData.Signals {
 		fmt.Println("Testing", signal.Id)
-		evocation := sc.Evoke([]base.DistributedSignal{base.NewDistributedSignal("void")}, signal.ToDistributedSignal())
+		evocation := sc.Evoke(make([]base.DistributedSignal, 0), signal.ToDistributedSignal())
 		for _, sig := range evocation {
 			fmt.Println("SuperCluster:\t", sig.Represent())
 		}

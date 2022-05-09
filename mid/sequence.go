@@ -52,7 +52,7 @@ func (s *Sequencer) Sequence(main base.DistributedSignal) []base.DistributedSign
 		}
 	}
 	if len(returnSequence) == 0 {
-		returnSequence = []base.DistributedSignal{base.NewDistributedSignal("void")}
+		returnSequence = []base.DistributedSignal{base.NewDistributedSignal(s.Id)}
 	}
 	return returnSequence
 }

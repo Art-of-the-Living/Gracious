@@ -44,7 +44,7 @@ func (sc *SuperCluster) Evoke(mSignals []base.DistributedSignal, aSignals ...bas
 				nds = append(nds, cluster.Evoke(mSignals[i], aSignals...))
 			}
 		} else {
-			nds = append(nds, cluster.Evoke(base.NewDistributedSignal("void"), aSignals...))
+			nds = append(nds, cluster.Evoke(base.NewDistributedSignal(fmt.Sprint(sc.Id, "#", i)), aSignals...))
 		}
 		if sc.WTA {
 			nds[i].WinnersTakeAll(0)
