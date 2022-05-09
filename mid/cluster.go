@@ -41,13 +41,13 @@ func (c *Cluster) Evoke(main base.DistributedSignal, aSignals ...base.Distribute
 	retrieve := make([]chan base.DistributedSignal, 0, len(aSignals))
 	for id, group := range c.groups {
 		// For each Group
-		for ai, associative := range aSignals {
+		for _, associative := range aSignals {
 			// For each association
 			if associative.Id == id {
 				// When the associative ID maps correctly to a Group ID, evoke the neuron group. This keeps us from
 				// evoking a group with the wrong association
 				go group.Evoke(main, associative, c.CorrelationThreshold)
-				retrieve[ai] = group.Pattern
+				retrieve = append(retrieve, group.Pattern)
 			}
 		}
 	}

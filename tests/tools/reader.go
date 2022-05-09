@@ -1,4 +1,4 @@
-package util
+package tools
 
 import (
 	"fmt"
@@ -37,4 +37,8 @@ func NewTextReader(text string) *TextReader {
 // Next returns true if there is any remaining text to be read
 func (tr *TextReader) Next() bool {
 	return tr.index < len(tr.text)
+}
+
+func (tr *TextReader) Reset() {
+	tr.index = 0
 }

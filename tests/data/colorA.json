@@ -1,37 +1,38 @@
 {
+    "id": "Color",
     "signals": [
         {
-            "name": "ColorRed",
+            "id": "ColorRed",
             "features": [
                 {"x": 0, "y": 0, "value": 1}
             ]
         },
         {
-            "name": "ColorGreen",
+            "id": "ColorGreen",
             "features": [
                 {"x": 0, "y": 1, "value": 1}
             ]
         },
         {
-            "name": "ColorBlue",
+            "id": "ColorBlue",
             "features": [
                 {"x": 0, "y": 2, "value": 1}
             ]
         },
         {
-            "name": "ColorYellow",
+            "id": "ColorYellow",
             "features": [
                 {"x": 0, "y": 3, "value": 1}
             ]
         },
         {
-            "name": "ColorCyan",
+            "id": "ColorCyan",
             "features": [
                 {"x": 0, "y": 4, "value": 1}
             ]
         },
         {
-            "name": "ColorMagenta",
+            "id": "ColorMagenta",
             "features": [
                 {"x": 0, "y": 5, "value": 1}
             ]
