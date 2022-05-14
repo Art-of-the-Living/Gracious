@@ -2,12 +2,12 @@ package tools
 
 import (
 	"fmt"
-	"github.com/Art-of-the-Living/gracious/base"
+	"github.com/Art-of-the-Living/gracious"
 	"github.com/Art-of-the-Living/gracious/util"
 	"strings"
 )
 
-// A TextReader is a type of FunctionalSensor where each call to evoke produces a new DistributedSignal
+// A TextReader is a type of FunctionalSensor where each call to evoke produces a new QualitativeSignal
 // for each letter in the TextReader's text property. Once the string has been read out, no more signals
 // will be produced. Text is considered to be only the 26 letters of the alphabet. Text is not case-sensitive.
 // Text which is not a letter is interpreted to be a blank signal.
@@ -20,12 +20,12 @@ type TextReader struct {
 // NewTextReader creates a nex TextReader instance with the text value passed to text
 func NewTextReader(text string) *TextReader {
 	tr := TextReader{text: strings.ToUpper(text), index: 0}
-	tr.SetProcessor(func() base.DistributedSignal {
-		ds := base.NewDistributedSignal(fmt.Sprint(text, "#", tr.index))
+	tr.SetProcessor(func() gracious.QualitativeSignal {
+		ds := gracious.NewQualitativeSignal(fmt.Sprint(text, "#", tr.index))
 		if tr.index < len(tr.text) {
 			char := int(tr.text[tr.index])
 			if char >= 65 && char <= 90 {
-				ds.Features[base.Address{X: 0, Y: int(char) - 65}] = 1
+				ds.Features[gracious.Address{X: 0, Y: int(char) - 65}] = 1
 			}
 			tr.index++
 		}
@@ -39,6 +39,30 @@ func (tr *TextReader) Next() bool {
 	return tr.index < len(tr.text)
 }
 
+// Reset returns the index value of the TextReader to 0 to begin evocations again.
 func (tr *TextReader) Reset() {
 	tr.index = 0
+}
+
+// A JsonReader is a type of FunctionalSensor where each call to evoke produces a new QualitativeSignal
+// from the set of signal data based on the currently set
+type JsonReader struct {
+	signals  util.JsonSignalArray
+	targetId string
+	util.FunctionalSensor
+}
+
+func NewJsonReader(signals util.JsonSignalArray, targetId string) *JsonReader {
+	jsR := JsonReader{signals: signals, targetId: targetId}
+	jsR.SetProcessor(jsR.getActiveSignal)
+	return &jsR
+}
+
+func (jsR *JsonReader) getActiveSignal() gracious.QualitativeSignal {
+	return jsR.signals.GetJsonSignalById(jsR.targetId).ToDistributedSignal()
+}
+
+// SetTarget sets the id that should be evoked from the JsonSignalArray
+func (jsR *JsonReader) SetTarget(id string) {
+	jsR.targetId = id
 }

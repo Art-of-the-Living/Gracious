@@ -1,4 +1,4 @@
-package base
+package gracious
 
 // The Synapse performs the crucial job of connecting associations to neuron groups. Each synapse has a certain weight
 // which is either negative 1 or positive one. Once the weight has been set to one via +3:-1 Hebbian learning, the weight
