@@ -1,4 +1,4 @@
-package gracious
+package util
 
 import (
 	"fmt"
@@ -40,22 +40,11 @@ func NewQualitativeSignal(name string) QualitativeSignal {
 	return QualitativeSignal{Id: name + "-Sig", Features: make(map[Address]int)}
 }
 
-// Composite will add all the features of B to the features of A. Where-ever there is overlap the features are summed.
-func (q *QualitativeSignal) Composite(signal QualitativeSignal) {
-	for addr, feature := range signal.Features {
-		if _, ok := q.Features[addr]; ok {
-			q.Features[addr] += feature
-		} else {
-			q.Features[addr] = feature
-		}
-	}
-}
-
-// WinnersTakeAll forces the Features in the QualitativeSignal to fight for dominance and only the strongest features
+// WinnerTakesAll forces the Features in the QualitativeSignal to fight for dominance and only the strongest features
 // will remain present in the signal. The gap parameter permits a level of tolerance for features which almost meet
 // with max threshold. No signal beneath 1 will ever be passed through. Signals with values above 4, will be reduced
 // by half.
-func (q *QualitativeSignal) WinnersTakeAll(gap int) {
+func (q *QualitativeSignal) WinnerTakesAll(gap int) {
 	max := 1
 	for _, feature := range q.Features {
 		if feature > max {
@@ -71,6 +60,18 @@ func (q *QualitativeSignal) WinnersTakeAll(gap int) {
 			}
 		}
 	}
+}
+
+// Composite will add all the features of B to the features of A. Where-ever there is overlap the features are summed.
+func Composite(signalA QualitativeSignal, signalB QualitativeSignal) QualitativeSignal {
+	for addr, feature := range signalA.Features {
+		if _, ok := signalB.Features[addr]; ok {
+			signalB.Features[addr] += feature
+		} else {
+			signalB.Features[addr] = feature
+		}
+	}
+	return signalB
 }
 
 // Decay will reduce the strength of every signal in the QualitativeSignal by the parameter, factor. The signal level

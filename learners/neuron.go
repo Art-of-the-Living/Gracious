@@ -1,13 +1,16 @@
-package gracious
+package learners
 
-import "sync"
+import (
+	"github.com/Art-of-the-Living/gracious/util"
+	"sync"
+)
 
 // Neuron models the unary behaviour of a single neuron. A neuron is only tangibly useful as a component part of a
 // system of Neurons. The goal of each individual neuron is to form an association between synaptic inputs and the
 // Neurons "firing" state. The neuron should fire, if and only if, the synaptic inputs
 type Neuron struct {
 	// Internal Attributes
-	synapses        map[Address]*Synapse
+	synapses        map[util.Address]*Synapse
 	axon            int
 	match           bool
 	novelty         bool
@@ -16,7 +19,7 @@ type Neuron struct {
 }
 
 func NewNeuron() *Neuron {
-	synapses := make(map[Address]*Synapse)
+	synapses := make(map[util.Address]*Synapse)
 	n := Neuron{synapses: synapses, learningEnabled: true}
 	return &n
 }
@@ -35,7 +38,7 @@ func (n *Neuron) GetSumOfWeights() int {
 // Evoke tests the neuron for firing and writes the fired value to the 'axon'
 // channel. If the firing state does not evoke in the presence of the training
 // signal, the synaptic association trains itself.
-func (n *Neuron) Evoke(training int, associative QualitativeSignal, correlation int) {
+func (n *Neuron) Evoke(training int, associative util.QualitativeSignal, correlation int) {
 	sum := 0
 	// Test the neuron synaptic associative evocations, if there is not a synapse present to handle the association
 	// feature then a new synapse will be made.
@@ -66,7 +69,7 @@ func (n *Neuron) Evoke(training int, associative QualitativeSignal, correlation 
 }
 
 // AsyncEvoke will Evoke this Neuron as a member of a WaitGroup
-func (n *Neuron) AsyncEvoke(training int, associative QualitativeSignal, correlation int, wg *sync.WaitGroup) {
+func (n *Neuron) AsyncEvoke(training int, associative util.QualitativeSignal, correlation int, wg *sync.WaitGroup) {
 	defer wg.Done()
 	n.Evoke(training, associative, correlation)
 }

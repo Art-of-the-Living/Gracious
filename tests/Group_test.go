@@ -2,17 +2,18 @@ package tests
 
 import (
 	"fmt"
-	"github.com/Art-of-the-Living/gracious"
+	"github.com/Art-of-the-Living/gracious/learners"
 	"github.com/Art-of-the-Living/gracious/tests/tools"
 	"github.com/Art-of-the-Living/gracious/util"
 	"testing"
 )
 
-func iterate(g gracious.Group, a gracious.QualitativeSignal, b gracious.QualitativeSignal, iterations int) gracious.QualitativeSignal {
-	var evocation gracious.QualitativeSignal
+func iterate(g learners.Group, a util.QualitativeSignal, b util.QualitativeSignal, iterations int) util.QualitativeSignal {
+	var evocation util.QualitativeSignal
+	fmt.Println("Association: ", b.Represent())
 	for i := 0; i < iterations; i++ {
 		evocation = g.Evoke(a, b)
-		evocation.WinnersTakeAll(0)
+		evocation.WinnerTakesAll(0)
 		fmt.Println(evocation.Represent())
 	}
 	return evocation
@@ -21,7 +22,7 @@ func iterate(g gracious.Group, a gracious.QualitativeSignal, b gracious.Qualitat
 func TestBasicGroup(t *testing.T) {
 	trainingIterations := 6 // Number of times to train on each signal
 	testingIterations := 6  // Number of times to test on each signal
-	bg := gracious.NewBasicGroup("testGroup1")
+	bg := learners.NewBasicGroup("testGroup1")
 	bg.CorrelationThreshold = 5
 	colorJSA := util.JsonFromFileName("data/colorA.json")
 	colorReader := tools.NewJsonReader(colorJSA, "blue")
@@ -45,23 +46,23 @@ func TestBasicGroup(t *testing.T) {
 	iterate(bg, colorReader.Evoke(), wordReader.Evoke(), trainingIterations)
 	// ### END OF TRAINING ###
 	wordReader.SetTarget("red")
-	iterate(bg, gracious.NewQualitativeSignal("void"), wordReader.Evoke(), testingIterations)
+	iterate(bg, util.NewQualitativeSignal("void"), wordReader.Evoke(), testingIterations)
 	wordReader.SetTarget("green")
-	iterate(bg, gracious.NewQualitativeSignal("void"), wordReader.Evoke(), testingIterations)
+	iterate(bg, util.NewQualitativeSignal("void"), wordReader.Evoke(), testingIterations)
 	wordReader.SetTarget("blue")
-	iterate(bg, gracious.NewQualitativeSignal("void"), wordReader.Evoke(), testingIterations)
+	iterate(bg, util.NewQualitativeSignal("void"), wordReader.Evoke(), testingIterations)
 	wordReader.SetTarget("yellow")
-	iterate(bg, gracious.NewQualitativeSignal("void"), wordReader.Evoke(), testingIterations)
+	iterate(bg, util.NewQualitativeSignal("void"), wordReader.Evoke(), testingIterations)
 	wordReader.SetTarget("cyan")
-	iterate(bg, gracious.NewQualitativeSignal("void"), wordReader.Evoke(), testingIterations)
+	iterate(bg, util.NewQualitativeSignal("void"), wordReader.Evoke(), testingIterations)
 	wordReader.SetTarget("magenta")
-	iterate(bg, gracious.NewQualitativeSignal("void"), wordReader.Evoke(), testingIterations)
+	iterate(bg, util.NewQualitativeSignal("void"), wordReader.Evoke(), testingIterations)
 }
 
 func TestAdvancedGroup(t *testing.T) {
 	trainingIterations := 12 // Number of times to train on each signal
 	testingIterations := 6   // Number of times to test on each signal
-	ag := gracious.NewAdvancedGroup("testingGroupA")
+	ag := learners.NewAdvancedGroup("testingGroupA")
 	ag.CorrelationThreshold = 5
 	ag.GrdCorrelationThreshold = 3
 	colorJSA := util.JsonFromFileName("data/colorB.json")
@@ -85,16 +86,17 @@ func TestAdvancedGroup(t *testing.T) {
 	wordReader.SetTarget("yellow")
 	iterate(ag, colorReader.Evoke(), wordReader.Evoke(), trainingIterations)
 	// ### END OF TRAINING ###
+	fmt.Println("### BEGIN TESTING ###")
 	wordReader.SetTarget("red")
-	iterate(ag, gracious.NewQualitativeSignal("redTest"), wordReader.Evoke(), testingIterations)
+	iterate(ag, util.NewQualitativeSignal("redTest"), wordReader.Evoke(), testingIterations)
 	wordReader.SetTarget("green")
-	iterate(ag, gracious.NewQualitativeSignal("greenTest"), wordReader.Evoke(), testingIterations)
+	iterate(ag, util.NewQualitativeSignal("greenTest"), wordReader.Evoke(), testingIterations)
 	wordReader.SetTarget("blue")
-	iterate(ag, gracious.NewQualitativeSignal("blueTest"), wordReader.Evoke(), testingIterations)
+	iterate(ag, util.NewQualitativeSignal("blueTest"), wordReader.Evoke(), testingIterations)
 	wordReader.SetTarget("yellow")
-	iterate(ag, gracious.NewQualitativeSignal("yellowTest"), wordReader.Evoke(), testingIterations)
+	iterate(ag, util.NewQualitativeSignal("yellowTest"), wordReader.Evoke(), testingIterations)
 	wordReader.SetTarget("cyan")
-	iterate(ag, gracious.NewQualitativeSignal("cyanTest"), wordReader.Evoke(), testingIterations)
+	iterate(ag, util.NewQualitativeSignal("cyanTest"), wordReader.Evoke(), testingIterations)
 	wordReader.SetTarget("magenta")
-	iterate(ag, gracious.NewQualitativeSignal("magentaTest"), wordReader.Evoke(), testingIterations)
+	iterate(ag, util.NewQualitativeSignal("magentaTest"), wordReader.Evoke(), testingIterations)
 }

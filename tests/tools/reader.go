@@ -2,7 +2,6 @@ package tools
 
 import (
 	"fmt"
-	"github.com/Art-of-the-Living/gracious"
 	"github.com/Art-of-the-Living/gracious/util"
 	"strings"
 )
@@ -20,12 +19,12 @@ type TextReader struct {
 // NewTextReader creates a nex TextReader instance with the text value passed to text
 func NewTextReader(text string) *TextReader {
 	tr := TextReader{text: strings.ToUpper(text), index: 0}
-	tr.SetProcessor(func() gracious.QualitativeSignal {
-		ds := gracious.NewQualitativeSignal(fmt.Sprint(text, "#", tr.index))
+	tr.SetProcessor(func() util.QualitativeSignal {
+		ds := util.NewQualitativeSignal(fmt.Sprint(text, "#", tr.index))
 		if tr.index < len(tr.text) {
 			char := int(tr.text[tr.index])
 			if char >= 65 && char <= 90 {
-				ds.Features[gracious.Address{X: 0, Y: int(char) - 65}] = 1
+				ds.Features[util.Address{X: 0, Y: int(char) - 65}] = 1
 			}
 			tr.index++
 		}
@@ -58,7 +57,7 @@ func NewJsonReader(signals util.JsonSignalArray, targetId string) *JsonReader {
 	return &jsR
 }
 
-func (jsR *JsonReader) getActiveSignal() gracious.QualitativeSignal {
+func (jsR *JsonReader) getActiveSignal() util.QualitativeSignal {
 	return jsR.signals.GetJsonSignalById(jsR.targetId).ToDistributedSignal()
 }
 
