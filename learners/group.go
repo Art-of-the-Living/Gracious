@@ -1,16 +1,17 @@
-package gracious
+package learners
 
 import (
+	"github.com/Art-of-the-Living/gracious/util"
 	"sync"
 )
 
 type Group interface {
-	GetPattern() QualitativeSignal
-	GetMatchPattern() QualitativeSignal
-	GetMisMatchPattern() QualitativeSignal
+	GetPattern() util.QualitativeSignal
+	GetMatchPattern() util.QualitativeSignal
+	GetMisMatchPattern() util.QualitativeSignal
 	GetMatchLevel() int
-	Evoke(main QualitativeSignal, association QualitativeSignal) QualitativeSignal
-	AsyncEvoke(main QualitativeSignal, association QualitativeSignal, wg *sync.WaitGroup) QualitativeSignal
+	Evoke(main util.QualitativeSignal, association util.QualitativeSignal) util.QualitativeSignal
+	AsyncEvoke(main util.QualitativeSignal, association util.QualitativeSignal, wg *sync.WaitGroup) util.QualitativeSignal
 }
 
 // BasicGroup is a set of neurons with a specific associative QualitativeSignal
@@ -21,16 +22,16 @@ type Group interface {
 // 1->N or N->1. A Basic Group cannot associate M->N without interference. For
 // M->N signal association the AdvancedGroup must be used.
 type BasicGroup struct {
-	Id                   string              // The name of this group of Neurons
-	neurons              map[Address]*Neuron // The Neurons which compose this BasicGroup
-	pattern              QualitativeSignal   // The active firing Pattern of this BasicGroup after evocation
-	PassThrough          bool                // Determines if the main signal pattern should pass through to the output
-	CorrelationThreshold int                 // Determines the threshold for synaptic learning in this group
+	Id                   string                   // The name of this group of Neurons
+	neurons              map[util.Address]*Neuron // The Neurons which compose this BasicGroup
+	pattern              util.QualitativeSignal   // The active firing Pattern of this BasicGroup after evocation
+	PassThrough          bool                     // Determines if the main signal pattern should pass through to the output
+	CorrelationThreshold int                      // Determines the threshold for synaptic learning in this group
 }
 
 // NewBasicGroup returns a new BasicGroup instance with an empty map of Neuron instances
 func NewBasicGroup(id string) *BasicGroup {
-	neurons := make(map[Address]*Neuron)
+	neurons := make(map[util.Address]*Neuron)
 	ng := BasicGroup{
 		neurons: neurons,
 		Id:      id,
@@ -39,13 +40,13 @@ func NewBasicGroup(id string) *BasicGroup {
 }
 
 // GetPattern returns the actively evoked firing pattern of this group
-func (g *BasicGroup) GetPattern() QualitativeSignal {
+func (g *BasicGroup) GetPattern() util.QualitativeSignal {
 	return g.pattern
 }
 
 // GetMatchPattern returns a QualitativeSignal where each feature indicates the match condition of a Neuron in the Group
-func (g *BasicGroup) GetMatchPattern() QualitativeSignal {
-	matchPattern := NewQualitativeSignal(g.Id + "-match")
+func (g *BasicGroup) GetMatchPattern() util.QualitativeSignal {
+	matchPattern := util.NewQualitativeSignal(g.Id + "-match")
 	for addr, neuron := range g.neurons {
 		if neuron.match {
 			matchPattern.Features[addr] = 1
@@ -55,8 +56,8 @@ func (g *BasicGroup) GetMatchPattern() QualitativeSignal {
 }
 
 // GetMisMatchPattern returns a QualitativeSignal where each feature indicates the mismatch condition of a Neuron in the Group
-func (g *BasicGroup) GetMisMatchPattern() QualitativeSignal {
-	matchPattern := NewQualitativeSignal(g.Id + "-mismatch")
+func (g *BasicGroup) GetMisMatchPattern() util.QualitativeSignal {
+	matchPattern := util.NewQualitativeSignal(g.Id + "-mismatch")
 	for addr, neuron := range g.neurons {
 		if !neuron.match {
 			matchPattern.Features[addr] = 1
@@ -84,11 +85,11 @@ func (g *BasicGroup) GetMatchLevel() int {
 // an update to the match signals which are retrievable with GetMatchPattern,
 // GetMisMatchPattern, and GetMatchLevel. The pattern is returned, but can also
 // be retrieved via GetPattern.
-func (g *BasicGroup) Evoke(main QualitativeSignal, association QualitativeSignal) QualitativeSignal {
+func (g *BasicGroup) Evoke(main util.QualitativeSignal, association util.QualitativeSignal) util.QualitativeSignal {
 	if g.PassThrough {
 		g.pattern = main
 	} else {
-		g.pattern = NewQualitativeSignal(main.Id)
+		g.pattern = util.NewQualitativeSignal(main.Id)
 	}
 	// Test the incoming signal for building new neurons
 	for addr := range main.Features {
@@ -111,31 +112,9 @@ func (g *BasicGroup) Evoke(main QualitativeSignal, association QualitativeSignal
 }
 
 // AsyncEvoke will Evoke this Group as a member of a WaitGroup
-func (g *BasicGroup) AsyncEvoke(main QualitativeSignal, association QualitativeSignal, wg *sync.WaitGroup) QualitativeSignal {
+func (g *BasicGroup) AsyncEvoke(main util.QualitativeSignal, association util.QualitativeSignal, wg *sync.WaitGroup) util.QualitativeSignal {
 	defer wg.Done()
-	if g.PassThrough {
-		g.pattern = main
-	} else {
-		g.pattern = NewQualitativeSignal(main.Id)
-	}
-	// Test the incoming signal for building new neurons
-	for addr := range main.Features {
-		if _, ok := g.neurons[addr]; !ok { // Does the BasicGroup have a Neuron at the main feature address
-			g.neurons[addr] = NewNeuron() // If not, create a new neuron
-		}
-	}
-	// Test each neuron for firing strength.
-	var iwg sync.WaitGroup
-	for addr, neuron := range g.neurons {
-		wg.Add(1)
-		go neuron.AsyncEvoke(main.Features[addr], association, g.CorrelationThreshold, &iwg)
-	}
-	iwg.Wait()
-	// Retrieve the firing strength of each neuron and adjust the firing Pattern accordingly
-	for address, neuron := range g.neurons {
-		g.pattern.Features[address] += neuron.axon
-	}
-	return g.pattern
+	return g.Evoke(main, association)
 }
 
 // An AdvancedGroup handles more complex relationships than a BasicGroup. While a
@@ -165,8 +144,8 @@ func NewAdvancedGroup(id string) *AdvancedGroup {
 // Advanced Group will grow an additional Neuron for each additional possible
 // signal pattern. Therefore, a neuron must only be grown if there is no evocation by the existing set and
 // when the previously grown neuron is done learning.
-func (g *AdvancedGroup) Evoke(main QualitativeSignal, association QualitativeSignal) QualitativeSignal {
-	grandmotherSignal := NewQualitativeSignal(g.Id + "-grandmother")
+func (g *AdvancedGroup) Evoke(main util.QualitativeSignal, association util.QualitativeSignal) util.QualitativeSignal {
+	grandmotherSignal := util.NewQualitativeSignal(g.Id + "-grandmother")
 	var wg sync.WaitGroup
 	for _, neuron := range g.grdNeurons {
 		wg.Add(1)
@@ -175,9 +154,9 @@ func (g *AdvancedGroup) Evoke(main QualitativeSignal, association QualitativeSig
 	wg.Wait()
 	// Retrieve the firing strength of each neuron and adjust the firing Pattern accordingly
 	for i, neuron := range g.grdNeurons {
-		grandmotherSignal.Features[Address{X: i}] += neuron.axon
+		grandmotherSignal.Features[util.Address{X: i}] += neuron.axon
 	}
-	grandmotherSignal.WinnersTakeAll(0)
+	grandmotherSignal.WinnerTakesAll(0)
 	// Test for new neuron growth
 	topNeuron := g.grdNeurons[len(g.grdNeurons)-1]
 	if topNeuron.GetSumOfWeights() > 0 {
@@ -191,28 +170,7 @@ func (g *AdvancedGroup) Evoke(main QualitativeSignal, association QualitativeSig
 }
 
 // AsyncEvoke will Evoke this Group as a member of a WaitGroup
-func (g *AdvancedGroup) AsyncEvoke(main QualitativeSignal, association QualitativeSignal, wg *sync.WaitGroup) QualitativeSignal {
+func (g *AdvancedGroup) AsyncEvoke(main util.QualitativeSignal, association util.QualitativeSignal, wg *sync.WaitGroup) util.QualitativeSignal {
 	defer wg.Done()
-	grandmotherSignal := NewQualitativeSignal(g.Id + "-grandmother")
-	var iwg sync.WaitGroup
-	for _, neuron := range g.grdNeurons {
-		wg.Add(1)
-		go neuron.AsyncEvoke(1, association, g.GrdCorrelationThreshold, &iwg)
-	}
-	iwg.Wait()
-	// Retrieve the firing strength of each neuron and adjust the firing Pattern accordingly
-	for i, neuron := range g.grdNeurons {
-		grandmotherSignal.Features[Address{X: i}] += neuron.axon
-	}
-	grandmotherSignal.WinnersTakeAll(0)
-	// Test for new neuron growth
-	topNeuron := g.grdNeurons[len(g.grdNeurons)-1]
-	if topNeuron.GetSumOfWeights() > 0 {
-		topNeuron.learningEnabled = false
-		if len(grandmotherSignal.Features) == 0 {
-			g.grdNeurons = append(g.grdNeurons, NewNeuron())
-		}
-	}
-	g.pattern = g.BasicGroup.Evoke(main, grandmotherSignal)
-	return g.pattern
+	return g.Evoke(main, association)
 }

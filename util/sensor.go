@@ -1,13 +1,9 @@
 package util
 
-import (
-	"github.com/Art-of-the-Living/gracious"
-)
-
 // A Sensor is any structure which can produce a slice of base.QualitativeSignal values. The Sensor interface is
 // implemented by the FunctionalSensor
 type Sensor interface {
-	Evoke() gracious.QualitativeSignal
+	Evoke() QualitativeSignal
 }
 
 // A FunctionalSensor produces phenomenal experience as direct sensory
@@ -20,7 +16,7 @@ type Sensor interface {
 // empty signal.
 type FunctionalSensor struct {
 	Id        string
-	processor func() gracious.QualitativeSignal
+	processor func() QualitativeSignal
 }
 
 // NewFunctionalSensor creates a new FunctionalSensor
@@ -35,16 +31,16 @@ func (n *FunctionalSensor) GetName() string {
 }
 
 // SetProcessor sets the function that should be run when this FunctionalSensor component is evoked.
-func (n *FunctionalSensor) SetProcessor(processor func() gracious.QualitativeSignal) {
+func (n *FunctionalSensor) SetProcessor(processor func() QualitativeSignal) {
 	n.processor = processor
 }
 
 // Evoke returns the result of the specified processor function. If no processor is defined, then an empty slice of
 // QualitativeSignal values will be returned.
-func (n *FunctionalSensor) Evoke() gracious.QualitativeSignal {
+func (n *FunctionalSensor) Evoke() QualitativeSignal {
 	if n.processor != nil {
 		return n.processor()
 	} else {
-		return gracious.NewQualitativeSignal(n.Id)
+		return NewQualitativeSignal(n.Id)
 	}
 }
