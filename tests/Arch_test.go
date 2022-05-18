@@ -3,6 +3,7 @@ package tests
 import (
 	"github.com/Art-of-the-Living/gracious/learners"
 	"github.com/Art-of-the-Living/gracious/runtime"
+	"github.com/Art-of-the-Living/gracious/runtime/services"
 	"github.com/Art-of-the-Living/gracious/tests/tools"
 	"github.com/Art-of-the-Living/gracious/util"
 	"testing"
@@ -25,10 +26,10 @@ func TestArchBasic(t *testing.T) {
 	FdWord.GrdCorrelationThreshold = 4
 	FdWord.CorrelationThreshold = 4
 
-	FdClrSrv := runtime.NewLearnerService(FdColor.Id, FdColor)
-	FdWrdSrv := runtime.NewLearnerService(FdWord.Id, FdWord)
-	SensorColorService := runtime.NewSensorService(colorReader.Id, colorReader)
-	SensorWordService := runtime.NewSensorService(wordReader.Id, wordReader)
+	FdClrSrv := services.NewLearnerService(FdColor.Id, FdColor)
+	FdWrdSrv := services.NewLearnerService(FdWord.Id, FdWord)
+	SensorColorService := services.NewSensorService(colorReader.Id, colorReader)
+	SensorWordService := services.NewSensorService(wordReader.Id, wordReader)
 	SensorColorService.AddListener(FdClrSrv.Main)
 	SensorWordService.AddListener(FdWrdSrv.Main)
 

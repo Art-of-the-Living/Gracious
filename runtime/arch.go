@@ -1,28 +1,29 @@
 package runtime
 
 import (
+	services2 "github.com/Art-of-the-Living/gracious/runtime/services"
 	"sync"
 	"time"
 )
 
 type Architecture struct {
 	Running  chan bool
-	services map[string]Service
+	services map[string]services2.Service
 }
 
 func NewArchitecture() *Architecture {
 	arch := Architecture{
-		services: make(map[string]Service),
+		services: make(map[string]services2.Service),
 		Running:  make(chan bool),
 	}
 	return &arch
 }
 
-func (arch *Architecture) AddService(service Service) {
+func (arch *Architecture) AddService(service services2.Service) {
 	arch.services[service.GetName()] = service
 }
 
-func (arch *Architecture) RemoveService(service Service) {
+func (arch *Architecture) RemoveService(service services2.Service) {
 	delete(arch.services, service.GetName())
 }
 
