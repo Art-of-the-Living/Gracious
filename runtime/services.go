@@ -30,7 +30,7 @@ type Listener struct {
 
 func NewListener() *Listener {
 	b := Listener{}
-	b.heldPattern = util.NewQualitativeSignal("void")
+	b.heldPattern = util.NewQualitativeSignal("listener-void")
 	return &b
 }
 func (l *Listener) Register(from *Broadcaster) {
@@ -146,6 +146,7 @@ func (s *SensorService) GetName() string {
 }
 func (s *SensorService) Broadcast(wg *sync.WaitGroup) {
 	defer wg.Done()
+	fmt.Println(s.name, s.pattern.Represent())
 	s.Advertise(s.pattern)
 }
 func (s *SensorService) Listen(wg *sync.WaitGroup) {

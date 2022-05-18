@@ -15,22 +15,34 @@ func TestArchBasic(t *testing.T) {
 	colorReader := tools.NewJsonReader(colorJSA, "blue")
 	wordJSA := util.JsonFromFileName("data/wordA.json")
 	wordReader := tools.NewJsonReader(wordJSA, "blue")
+
 	FdColor := learners.NewAdvancedGroup("FeedbackColor")
-	FdColor.PassThrough = true
+	FdColor.PassThrough = false
+	FdColor.CorrelationThreshold = 4
+	FdColor.GrdCorrelationThreshold = 4
 	FdWord := learners.NewAdvancedGroup("FeedbackWords")
-	FdWord.PassThrough = true
+	FdWord.PassThrough = false
+	FdWord.GrdCorrelationThreshold = 4
+	FdWord.CorrelationThreshold = 4
 
 	FdClrSrv := runtime.NewLearnerService(FdColor.Id, FdColor)
 	FdWrdSrv := runtime.NewLearnerService(FdWord.Id, FdWord)
-	SnsrColorSrv := runtime.NewSensorService(colorReader.Id, colorReader)
-	SnsrWordSrv := runtime.NewSensorService(wordReader.Id, wordReader)
-	SnsrColorSrv.AddListener(FdClrSrv.Main)
-	SnsrWordSrv.AddListener(FdWrdSrv.Main)
+	SensorColorService := runtime.NewSensorService(colorReader.Id, colorReader)
+	SensorWordService := runtime.NewSensorService(wordReader.Id, wordReader)
+	SensorColorService.AddListener(FdClrSrv.Main)
+	SensorWordService.AddListener(FdWrdSrv.Main)
+
 	arch.AddService(FdClrSrv)
 	arch.AddService(FdWrdSrv)
-	arch.AddService(SnsrWordSrv)
-	arch.AddService(SnsrColorSrv)
+	arch.AddService(SensorWordService)
+	arch.AddService(SensorColorService)
 	go arch.Start(500)
 	time.Sleep(time.Second * 5)
-	arch.Running = false
+	wordReader.SetTargetSignal("red")
+	colorReader.SetTargetSignal("red")
+	time.Sleep(time.Second * 5)
+	wordReader.SetTargetSignal("green")
+	colorReader.SetTargetSignal("green")
+	time.Sleep(time.Second * 5)
+	arch.Running <- false
 }

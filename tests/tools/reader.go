@@ -54,6 +54,7 @@ type JsonReader struct {
 func NewJsonReader(signals util.JsonSignalArray, targetId string) *JsonReader {
 	jsR := JsonReader{signals: signals, targetId: targetId}
 	jsR.SetProcessor(jsR.getActiveSignal)
+	jsR.Id = signals.Id
 	return &jsR
 }
 
@@ -61,7 +62,7 @@ func (jsR *JsonReader) getActiveSignal() util.QualitativeSignal {
 	return jsR.signals.GetJsonSignalById(jsR.targetId).ToDistributedSignal()
 }
 
-// SetTarget sets the id that should be evoked from the JsonSignalArray
-func (jsR *JsonReader) SetTarget(id string) {
+// SetTargetSignal sets the id that should be evoked from the JsonSignalArray
+func (jsR *JsonReader) SetTargetSignal(id string) {
 	jsR.targetId = id
 }

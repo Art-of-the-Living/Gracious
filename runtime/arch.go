@@ -6,14 +6,14 @@ import (
 )
 
 type Architecture struct {
-	Running  bool
+	Running  chan bool
 	services map[string]Service
 }
 
 func NewArchitecture() *Architecture {
 	arch := Architecture{
 		services: make(map[string]Service),
-		Running:  true,
+		Running:  make(chan bool),
 	}
 	return &arch
 }
@@ -41,8 +41,13 @@ func (arch *Architecture) Update() {
 }
 
 func (arch *Architecture) Start(delay int) {
-	for arch.Running {
+	state := true
+	for state {
 		arch.Update()
 		time.Sleep(time.Millisecond * time.Duration(delay))
+		select {
+		case state = <-arch.Running:
+		default:
+		}
 	}
 }

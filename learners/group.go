@@ -39,7 +39,7 @@ func NewBasicGroup(id string) *BasicGroup {
 	return &ng
 }
 
-// GetPattern returns the actively evoked firing pattern of this group
+// GetPattern returns the actively evoked firing pattern of this group. Once retrieved this value is reset.
 func (g *BasicGroup) GetPattern() util.QualitativeSignal {
 	return g.pattern
 }
@@ -106,7 +106,9 @@ func (g *BasicGroup) Evoke(main util.QualitativeSignal, association util.Qualita
 	wg.Wait()
 	// Retrieve the firing strength of each neuron and adjust the firing Pattern accordingly
 	for address, neuron := range g.neurons {
-		g.pattern.Features[address] += neuron.axon
+		if neuron.axon > 0 {
+			g.pattern.Features[address] += neuron.axon
+		}
 	}
 	return g.pattern
 }
@@ -154,7 +156,9 @@ func (g *AdvancedGroup) Evoke(main util.QualitativeSignal, association util.Qual
 	wg.Wait()
 	// Retrieve the firing strength of each neuron and adjust the firing Pattern accordingly
 	for i, neuron := range g.grdNeurons {
-		grandmotherSignal.Features[util.Address{X: i}] += neuron.axon
+		if neuron.axon > 0 {
+			grandmotherSignal.Features[util.Address{X: i}] += neuron.axon
+		}
 	}
 	grandmotherSignal.WinnerTakesAll(0)
 	// Test for new neuron growth

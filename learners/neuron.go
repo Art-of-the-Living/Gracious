@@ -15,7 +15,6 @@ type Neuron struct {
 	match           bool
 	novelty         bool
 	learningEnabled bool
-	wg              sync.WaitGroup
 }
 
 func NewNeuron() *Neuron {
