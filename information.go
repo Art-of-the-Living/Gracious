@@ -1,4 +1,4 @@
-package util
+package gracious
 
 import (
 	"fmt"
@@ -62,16 +62,17 @@ func (q *QualitativeSignal) WinnerTakesAll(gap int) {
 	}
 }
 
-// Composite will add all the features of B to the features of A. Where-ever there is overlap the features are summed.
-func Composite(signalA QualitativeSignal, signalB QualitativeSignal) QualitativeSignal {
-	for addr, feature := range signalA.Features {
-		if _, ok := signalB.Features[addr]; ok {
-			signalB.Features[addr] += feature
-		} else {
-			signalB.Features[addr] = feature
+// Composite will add all the features of each signal to the features of Q. Where-ever there is overlap the features are summed.
+func (q *QualitativeSignal) Composite(signals ...QualitativeSignal) {
+	for _, signal := range signals {
+		for addr, feature := range signal.Features {
+			if _, ok := q.Features[addr]; ok {
+				q.Features[addr] += feature
+			} else {
+				q.Features[addr] = feature
+			}
 		}
 	}
-	return signalB
 }
 
 // Decay will reduce the strength of every signal in the QualitativeSignal by the parameter, factor. The signal level

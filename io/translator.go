@@ -1,8 +1,9 @@
-package util
+package io
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Art-of-the-Living/gracious"
 	"io/ioutil"
 	"os"
 )
@@ -10,7 +11,7 @@ import (
 // Translation offers an interface for creating structures capable of conversion into QualitativeSignal values.
 // By default, Json encoding is included via JsonSignalArray and JsonSignal.
 type Translation interface {
-	ToDistributedSignals() []QualitativeSignal
+	ToDistributedSignals() []gracious.QualitativeSignal
 }
 
 // JsonSignalArray encodes for a sequence (or set) of JsonSignal values. A
@@ -26,7 +27,7 @@ type JsonSignalArray struct {
 // GetJsonSignalById returns a JsonSignal from the array that matches the id. If there is no JsonSignal
 // that matches, an empty JsonSignal will be returned.
 func (jsa *JsonSignalArray) GetJsonSignalById(id string) JsonSignal {
-	js := JsonFromDistributedSignal(NewQualitativeSignal("void"))
+	js := JsonFromDistributedSignal(gracious.NewQualitativeSignal("void"))
 	for _, signal := range jsa.Signals {
 		if signal.Id == id {
 			return signal
@@ -36,8 +37,8 @@ func (jsa *JsonSignalArray) GetJsonSignalById(id string) JsonSignal {
 }
 
 // ToDistributedSignals converts a JsonSignalArray into a slice of base.QualitativeSignal values
-func (jsa *JsonSignalArray) ToDistributedSignals() []QualitativeSignal {
-	var tmp = make([]QualitativeSignal, len(jsa.Signals))
+func (jsa *JsonSignalArray) ToDistributedSignals() []gracious.QualitativeSignal {
+	var tmp = make([]gracious.QualitativeSignal, len(jsa.Signals))
 	for i, signal := range jsa.Signals {
 		tmp[i] = signal.ToDistributedSignal()
 	}
@@ -46,7 +47,7 @@ func (jsa *JsonSignalArray) ToDistributedSignals() []QualitativeSignal {
 
 // JsonFromDistributedSignals takes a slice of base.QualitativeSignal values and
 // formats them into JsonSignalArray.
-func JsonFromDistributedSignals(signals []QualitativeSignal) JsonSignalArray {
+func JsonFromDistributedSignals(signals []gracious.QualitativeSignal) JsonSignalArray {
 	jsa := JsonSignalArray{Signals: make([]JsonSignal, len(signals))}
 	for i, signal := range signals {
 		jsa.Signals[i] = JsonFromDistributedSignal(signal)
@@ -81,16 +82,16 @@ type JsonSignal struct {
 }
 
 // ToDistributedSignal converts a JsonSignal into a QualitativeSignal
-func (js JsonSignal) ToDistributedSignal() QualitativeSignal {
-	tmp := NewQualitativeSignal(js.Id)
+func (js JsonSignal) ToDistributedSignal() gracious.QualitativeSignal {
+	tmp := gracious.NewQualitativeSignal(js.Id)
 	for _, feature := range js.Features {
-		tmp.Features[Address{X: feature.X, Y: feature.Y}] = feature.Value
+		tmp.Features[gracious.Address{X: feature.X, Y: feature.Y}] = feature.Value
 	}
 	return tmp
 }
 
 // JsonFromDistributedSignal formats a base.QualitativeSignal into a JsonSignal
-func JsonFromDistributedSignal(signal QualitativeSignal) JsonSignal {
+func JsonFromDistributedSignal(signal gracious.QualitativeSignal) JsonSignal {
 	tmp := JsonSignal{Features: make([]jsonFeature, len(signal.Features))}
 	i := 0
 	for address, feature := range signal.Features {
